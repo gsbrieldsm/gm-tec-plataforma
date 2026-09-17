@@ -102,18 +102,20 @@ function NavLink({ href, label, active }: { href: string; label: string; active:
 }
 
 /* ── Sidebar ─────────────────────────────────────────────────────── */
-export function AdminSidebar() {
+export function AdminSidebar({ open = false, onClose }: { open?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const name    = session?.user?.name ?? session?.user?.email ?? "Usuário";
   const initial = name.charAt(0).toUpperCase();
-  const tenant  = session?.user?.tenantName ?? "";
+  // Uma conta = um tenant, identificado pelo email — por isso o email aqui
+  // e não o nome do tenant, que repetiria a linha de cima.
+  const tenant  = session?.user?.tenantSlug ?? session?.user?.email ?? "";
 
   const active = (href: string) =>
     pathname === href || (href !== "/admin" && pathname.startsWith(href));
 
   return (
-    <aside style={{
+    <aside className="admin-sidebar" data-open={open} style={{
       position: "fixed", left: 0, top: 0,
       height: "100vh", width: 240,
       background: "linear-gradient(180deg, #04041a 0%, #03030f 100%)",
@@ -182,7 +184,7 @@ export function AdminSidebar() {
       </div>
 
       {/* ── Nav ──────────────────────────────────────── */}
-      <nav style={{
+      <nav onClick={onClose} style={{
         flex: 1, overflowY: "auto",
         padding: "14px 6px",
         display: "flex", flexDirection: "column", gap: 22,
@@ -295,9 +297,8 @@ export function AdminSidebar() {
             }}>{name}</div>
             <div style={{
               fontFamily: SYS_FONT,
-              fontSize: 8.5, fontWeight: 600,
-              color: "#7c3fed", letterSpacing: "0.1em",
-              textTransform: "uppercase",
+              fontSize: 9, fontWeight: 500,
+              color: "#7c3fed",
               lineHeight: 1.2, marginTop: 2,
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             }} title={tenant}>{tenant || " "}</div>

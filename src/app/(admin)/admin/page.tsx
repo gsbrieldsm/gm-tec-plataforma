@@ -142,7 +142,7 @@ export default function DashboardPage() {
     <div style={{ maxWidth: 1100, fontFamily: UI }}>
 
       {/* ── HERO ──────────────────────────────────────────── */}
-      <div style={{
+      <div className="admin-hero" style={{
         background: "linear-gradient(135deg, #0c0420 0%, #190a58 35%, #0b1e66 68%, #062244 100%)",
         borderRadius: 18,
         padding: "36px 40px 38px",
@@ -178,7 +178,7 @@ export default function DashboardPage() {
 
         {/* Floating tech tags */}
         {HERO_TAGS.map((tag, i) => (
-          <span key={tag} style={{
+          <span key={tag} className="admin-hero-tags" style={{
             position: "absolute",
             fontFamily: UI, fontSize: 8.5, fontWeight: 700,
             color: "rgba(255,255,255,0.18)",
@@ -223,7 +223,7 @@ export default function DashboardPage() {
         </div>
 
         {/* live + clock */}
-        <div style={{
+        <div className="admin-hero-clock" style={{
           position: "absolute", top: 36, right: 40, zIndex: 1,
           display: "flex", alignItems: "center", gap: 10,
         }}>
@@ -246,7 +246,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Metric cards ──────────────────────────────────── */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 16 }}>
+      <div className="admin-grid-metrics" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 16 }}>
         {METRICS.map((m) => (
           <div key={m.label} style={{
             background: "var(--surface)",
@@ -288,7 +288,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Chart + Actions ───────────────────────────────── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 268px", gap: 12, marginBottom: 14 }}>
+      <div className="admin-grid-split" style={{ display: "grid", gridTemplateColumns: "1fr 268px", gap: 12, marginBottom: 14 }}>
 
         {/* Sales bar chart */}
         <div style={{

@@ -253,3 +253,70 @@ body {
   0%, 100% { transform: translateY(0px); opacity: 0.2; }
   50%       { transform: translateY(-8px); opacity: 0.4; }
 }
+
+/* ── Admin shell: sidebar fixa no desktop, drawer no mobile ─────── */
+.admin-main    { margin-left: 240px; }
+.admin-content { padding: 32px 40px; }
+.admin-topbar  { display: none; }
+
+.admin-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+@media (max-width: 1024px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    box-shadow: 4px 0 32px rgba(0, 0, 0, 0.3);
+  }
+  .admin-sidebar[data-open="true"] { transform: translateX(0); }
+
+  .admin-backdrop[data-open="true"] { opacity: 1; pointer-events: auto; }
+
+  .admin-main    { margin-left: 0; }
+  .admin-content { padding: 16px; }
+
+  .admin-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-sidebar, .admin-backdrop { transition: none; }
+}
+
+/* ── Heros das telas do admin em telas estreitas ────────────────── */
+@media (max-width: 640px) {
+  .admin-hero {
+    padding: 22px 18px 20px !important;
+    border-radius: 16px !important;
+  }
+  .admin-hero-tags { display: none !important; }
+  .admin-hero h1   { font-size: 21px !important; }
+  .admin-hero-stats      { gap: 18px !important; margin-top: 20px !important; }
+  .admin-hero-stats p:first-child { font-size: 16px !important; }
+  .admin-hero-clock { top: 14px !important; right: 16px !important; }
+}
+
+/* Grids do dashboard colapsam em uma coluna quando não cabem */
+.admin-grid-metrics > *, .admin-grid-split > * { min-width: 0; }
+
+@media (max-width: 900px) {
+  .admin-grid-metrics, .admin-grid-split {
+    grid-template-columns: 1fr !important;
+  }
+}

@@ -223,7 +223,7 @@ export default function ClientesPage() {
   return (
     <>
       {/* ── Hero ──────────────────────────────────── */}
-      <div style={{
+      <div className="admin-hero" style={{
         position: "relative", borderRadius: 20,
         overflow: "hidden",
         background: "linear-gradient(135deg,#0c0420 0%,#190a58 35%,#0b1e66 65%,#062244 100%)",
@@ -250,7 +250,7 @@ export default function ClientesPage() {
         </div>
 
         {/* floating tag labels */}
-        <div style={{
+        <div className="admin-hero-tags" style={{
           position:"absolute",top:16,right:20,
           display:"flex",gap:7,flexWrap:"wrap",justifyContent:"flex-end",maxWidth:280,
         }}>
@@ -286,7 +286,7 @@ export default function ClientesPage() {
         </div>
 
         {/* stats strip + novo cliente */}
-        <div style={{
+        <div className="admin-hero-stats" style={{
           position:"relative",zIndex:1,
           display:"flex",alignItems:"flex-end",justifyContent:"space-between",
           gap:24,marginTop:26,flexWrap:"wrap",
@@ -576,24 +576,29 @@ function CustomerDrawer({ customer: c, onClose }: { customer: Customer; onClose:
                   border:"1px solid var(--border)",
                   borderRadius:8,padding:"9px 12px",
                 }}>
-                  <ShoppingBag size={12} color="var(--text-3)"/>
-                  <div style={{ flex:1 }}>
-                    <span style={{ fontFamily:MONO,fontSize:11,fontWeight:700,color:"var(--text-1)" }}>
-                      {o.id}
-                    </span>
-                    <span style={{ fontFamily:UI,fontSize:10,color:"var(--text-2)",margin:"0 5px" }}>·</span>
-                    <span style={{ fontFamily:UI,fontSize:10,color:"var(--text-2)" }}>{fmtDate(o.date)}</span>
-                    <span style={{ fontFamily:UI,fontSize:10,color:"var(--text-3)",marginLeft:5 }}>via {o.channel}</span>
+                  <ShoppingBag size={12} color="var(--text-3)" style={{ flexShrink:0 }}/>
+                  <div style={{ flex:1,minWidth:0 }}>
+                    <p style={{
+                      fontFamily:MONO,fontSize:11,fontWeight:700,color:"var(--text-1)",margin:0,
+                      whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+                    }}>{o.id}</p>
+                    <p style={{
+                      fontFamily:UI,fontSize:10,color:"var(--text-3)",margin:"2px 0 0",
+                      whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",
+                    }}>{fmtDate(o.date)} · {o.channel}</p>
                   </div>
-                  <span style={{ fontFamily:MONO,fontSize:11,fontWeight:700,color:"var(--text-1)" }}>
-                    {fmtBRL(o.value)}
-                  </span>
-                  <span style={{
-                    fontFamily:UI,fontSize:9,fontWeight:700,
-                    color:statusColor(o.status),
-                    background:`${statusColor(o.status)}18`,
-                    borderRadius:4,padding:"2px 6px",whiteSpace:"nowrap",
-                  }}>{o.status}</span>
+                  <div style={{ textAlign:"right",flexShrink:0 }}>
+                    <p style={{ fontFamily:MONO,fontSize:11,fontWeight:700,color:"var(--text-1)",margin:0 }}>
+                      {fmtBRL(o.value)}
+                    </p>
+                    <span style={{
+                      display:"inline-block",marginTop:3,
+                      fontFamily:UI,fontSize:9,fontWeight:700,
+                      color:statusColor(o.status),
+                      background:`${statusColor(o.status)}18`,
+                      borderRadius:4,padding:"2px 6px",whiteSpace:"nowrap",
+                    }}>{o.status}</span>
+                  </div>
                 </div>
               ))}
             </div>

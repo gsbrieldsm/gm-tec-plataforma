@@ -196,7 +196,7 @@ export default function ProdutosPage() {
   return (
     <>
       {/* ── Hero ──────────────────────────────────── */}
-      <div style={{
+      <div className="admin-hero" style={{
         position:"relative",borderRadius:20,overflow:"hidden",
         background:"linear-gradient(135deg,#0c0420 0%,#190a58 35%,#0b1e66 65%,#062244 100%)",
         padding:"32px 32px 28px",marginBottom:24,
@@ -219,7 +219,7 @@ export default function ProdutosPage() {
           }}/>
         </div>
 
-        <div style={{
+        <div className="admin-hero-tags" style={{
           position:"absolute",top:16,right:20,
           display:"flex",gap:7,flexWrap:"wrap",justifyContent:"flex-end",maxWidth:280,
         }}>
@@ -251,7 +251,7 @@ export default function ProdutosPage() {
         </div>
 
         {/* stats + novo produto */}
-        <div style={{
+        <div className="admin-hero-stats" style={{
           position:"relative",zIndex:1,
           display:"flex",alignItems:"flex-end",justifyContent:"space-between",
           gap:24,marginTop:26,flexWrap:"wrap",
