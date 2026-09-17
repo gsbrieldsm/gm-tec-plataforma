@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  BarChart3, Package, Zap, ArrowRight, CheckCircle,
+  BarChart3, Package, ArrowRight, CheckCircle,
   TrendingUp, Settings, MessageCircle, CreditCard,
   Lightbulb, Factory, GitBranch, Layers, ShoppingBag,
   ChevronDown, ChevronUp, ArrowDown,
