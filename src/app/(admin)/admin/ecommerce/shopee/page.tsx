@@ -137,18 +137,20 @@ export default function ShopeePage() {
             style={{ background: "var(--surface)", border: "1px solid rgba(238,77,45,0.2)" }}
           >
             <p className="text-xs mb-3" style={{ color: "var(--text-2)" }}>
-              Após configurar as variáveis de ambiente no Vercel, clique abaixo:
+              A autorização da loja entra assim que as credenciais do Open Platform
+              estiverem configuradas.
             </p>
             <button
-              onClick={() => { window.location.href = "/api/shopee/connect"; }}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
+              disabled
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed"
               style={{
-                background: "linear-gradient(135deg,#EE4D2D,#d63f20)",
-                boxShadow: "0 4px 20px rgba(238,77,45,0.3)",
+                background: "var(--surface-2)",
+                border: "1px solid var(--border)",
+                color: "var(--text-3)",
               }}
             >
               <Link2 className="h-4 w-4" />
-              Conectar loja Shopee
+              Conectar loja Shopee · em breve
             </button>
           </div>
         </div>

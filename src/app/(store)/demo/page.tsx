@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { SessionProvider, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { AUTH_BASE_PATH, apiUrl } from "@/lib/base-path";
 
 const C = {
   bg: "#07070f",
@@ -23,6 +24,14 @@ const C = {
 };
 
 export default function DemoPage() {
+  return (
+    <SessionProvider basePath={AUTH_BASE_PATH}>
+      <DemoForm />
+    </SessionProvider>
+  );
+}
+
+function DemoForm() {
   const router = useRouter();
   const [step, setStep] = useState<"register" | "login">("register");
   const [form, setForm] = useState({ name: "", email: "", password: "" });
@@ -37,7 +46,7 @@ export default function DemoPage() {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/register", {
+      const res = await fetch(apiUrl("/api/auth/register"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

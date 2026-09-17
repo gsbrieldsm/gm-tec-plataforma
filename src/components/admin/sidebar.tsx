@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import { apiUrl } from "@/lib/base-path";
 
 /* ── Nav model ───────────────────────────────────────────────────── */
 type NavItem = { label: string; href: string };
@@ -302,7 +303,7 @@ export function AdminSidebar() {
             }} title={tenant}>{tenant || " "}</div>
           </div>
           <button
-            onClick={() => signOut({ callbackUrl: "/demo" })}
+            onClick={() => signOut({ callbackUrl: apiUrl("/demo") })}
             title="Sair"
             style={{
               background: "none", border: "none", cursor: "pointer",
