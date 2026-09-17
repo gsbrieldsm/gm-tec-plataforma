@@ -386,8 +386,8 @@ export default function ApresentacaoPage() {
                 </div>
               ))}
             </div>
-            <Link href="/funil" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 22px", borderRadius: 12, background: "rgba(139,92,246,0.14)", border: "1px solid rgba(139,92,246,0.32)", color: C.violet, fontWeight: 600, fontSize: 14 }}>
-              Montar meu funil de produção <ArrowRight size={14} />
+            <Link href="/demo" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 22px", borderRadius: 12, background: "rgba(139,92,246,0.14)", border: "1px solid rgba(139,92,246,0.32)", color: C.violet, fontWeight: 600, fontSize: 14 }}>
+              Ver plataforma <ArrowRight size={14} />
             </Link>
           </div>
 
@@ -455,11 +455,11 @@ export default function ApresentacaoPage() {
             <span className="grad">suas vendas?</span>
           </h2>
           <p style={{ color: C.text2, fontSize: 15, marginBottom: 30, lineHeight: 1.7 }}>
-            Monte seu funil de produção agora e veja como a plataforma se encaixa no seu negócio. Sem compromisso.
+            Acesse a plataforma e veja como ela se encaixa no seu negócio. Sem compromisso.
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/funil" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 28px", borderRadius: 12, fontWeight: 700, fontSize: 14, background: "linear-gradient(135deg,#6366f1,#8b5cf6)", color: "#fff" }}>
-              Montar meu funil <ArrowRight size={15} />
+            <Link href="/demo" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 28px", borderRadius: 12, fontWeight: 700, fontSize: 14, background: "linear-gradient(135deg,#6366f1,#8b5cf6)", color: "#fff" }}>
+              Acessar plataforma <ArrowRight size={15} />
             </Link>
             <a href="https://wa.me/55?text=Quero+conhecer+a+Moda+Store" target="_blank" rel="noopener noreferrer"
               style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 28px", borderRadius: 12, fontSize: 14, border: `1px solid ${C.border}`, color: C.text2 }}>
@@ -478,7 +478,7 @@ export default function ApresentacaoPage() {
           <span style={{ fontSize: 13, color: C.text3 }}>GM & Co Tec © 2026</span>
         </div>
         <div style={{ display: "flex", gap: 20, fontSize: 12 }}>
-          <Link href="/funil" style={{ color: C.text3 }}>Construtor de Funil</Link>
+          <Link href="/demo" style={{ color: C.text3 }}>Plataforma</Link>
           <Link href="/admin" style={{ color: C.text3 }}>Admin</Link>
         </div>
       </footer>

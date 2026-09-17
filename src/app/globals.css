@@ -1,75 +1,255 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Base */
+  --color-background:             var(--bg);
+  --color-foreground:             var(--text-1);
+
+  /* Card */
+  --color-card:                   var(--surface);
+  --color-card-foreground:        var(--text-1);
+
+  /* Popover */
+  --color-popover:                var(--surface);
+  --color-popover-foreground:     var(--text-1);
+
+  /* Primary (accent) */
+  --color-primary:                var(--accent);
+  --color-primary-foreground:     #ffffff;
+
+  /* Secondary */
+  --color-secondary:              var(--surface-2);
+  --color-secondary-foreground:   var(--text-2);
+
+  /* Muted */
+  --color-muted:                  var(--surface-3);
+  --color-muted-foreground:       var(--text-2);
+
+  /* Accent */
+  --color-accent:                 var(--accent-bg);
+  --color-accent-foreground:      var(--accent);
+
+  /* Destructive */
+  --color-destructive:            var(--red);
+  --color-destructive-foreground: #ffffff;
+
+  /* Border / Input / Ring */
+  --color-border:                 var(--border);
+  --color-input:                  var(--border);
+  --color-ring:                   var(--accent);
+
+  /* Fonts */
+  --font-sans: var(--font-space), var(--font-geist-sans);
+  --font-mono: var(--font-space-mono), var(--font-geist-mono);
 }
 
-/* ── GM&Co Brand Tokens ─────────────────────────────── */
+/* ── GM & Co Tec — Design System ─────────────────────────────────── */
 :root {
-  --background:         #1a1310;
-  --foreground:         #f5ede0;
-  --card:               #211a14;
-  --card-foreground:    #f5ede0;
-  --popover:            #2f2419;
-  --popover-foreground: #f5ede0;
-  --primary:            #c9a96e;
-  --primary-foreground: #1a1310;
-  --secondary:          #2f2419;
-  --secondary-foreground: #f5ede0;
-  --muted:              #2f2419;
-  --muted-foreground:   #b8a78d;
-  --accent:             #38291c;
-  --accent-foreground:  #f5ede0;
-  --destructive:        #ef4444;
-  --destructive-foreground: #ffffff;
-  --border:             rgba(201,169,110,0.15);
-  --input:              rgba(201,169,110,0.2);
-  --ring:               #c9a96e;
-  --radius:             12px;
+  /* Content surfaces — light, clean */
+  --bg:         #f0edf9;
+  --surface:    #ffffff;
+  --surface-2:  #f6f3fc;
+  --surface-3:  #ece9f6;
+
+  /* Borders — violet-tinted, subtle on white */
+  --border:     rgba(123, 63, 237, 0.13);
+  --border-2:   rgba(123, 63, 237, 0.06);
+  --border-hi:  rgba(123, 63, 237, 0.3);
+
+  /* Text — dark, high-contrast for light background */
+  --text-1:     #0d0b1e;
+  --text-2:     #5e607e;
+  --text-3:     #a0a3c0;
+
+  /* Accent — deep violet */
+  --accent:     #7c3fed;
+  --accent-hi:  #9d6ef8;
+  --accent-bg:  rgba(124, 63, 237, 0.09);
+  --accent-glow:rgba(124, 63, 237, 0.2);
+
+  /* Cyan — for live / active states */
+  --cyan:       #06b6d4;
+  --cyan-bg:    rgba(6, 182, 212, 0.08);
+  --cyan-glow:  rgba(6, 182, 212, 0.2);
+
+  /* Semantic */
+  --green:      #059669;
+  --green-bg:   rgba(5, 150, 105, 0.08);
+  --amber:      #d97706;
+  --amber-bg:   rgba(217, 119, 6, 0.08);
+  --red:        #dc2626;
+  --red-bg:     rgba(220, 38, 38, 0.08);
+  --violet:     #7c3aed;
+  --violet-bg:  rgba(124, 58, 237, 0.08);
+
+  /* Radius */
+  --r-sm:  6px;
+  --r-md:  10px;
+  --r-lg:  14px;
+  --r-xl:  20px;
+
+  /* Easing */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-* {
-  border-color: var(--border);
-}
+/* ── Reset & base ──────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: var(--bg);
+  color: var(--text-1);
   font-feature-settings: "rlig" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
 }
 
-/* ── Token utilities ────────────────────────────────── */
-.bg-background    { background-color: var(--background); }
-.bg-card          { background-color: var(--card); }
-.bg-muted         { background-color: var(--muted); }
-.bg-primary       { background-color: var(--primary); }
-.bg-secondary     { background-color: var(--secondary); }
-.bg-accent        { background-color: var(--accent); }
-.bg-destructive   { background-color: var(--destructive); }
+/* ── Scrollbar ─────────────────────────────────────────────────────── */
+::-webkit-scrollbar              { width: 3px; height: 3px; }
+::-webkit-scrollbar-track        { background: transparent; }
+::-webkit-scrollbar-thumb        { background: rgba(124,63,237,0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover  { background: rgba(124,63,237,0.4); }
 
-.text-foreground          { color: var(--foreground); }
-.text-card-foreground     { color: var(--card-foreground); }
-.text-muted-foreground    { color: var(--muted-foreground); }
-.text-primary             { color: var(--primary); }
-.text-primary-foreground  { color: var(--primary-foreground); }
-.text-secondary-foreground { color: var(--secondary-foreground); }
-.text-accent-foreground   { color: var(--accent-foreground); }
-.text-destructive         { color: var(--destructive); }
-.text-destructive-foreground { color: var(--destructive-foreground); }
+/* ── Typography utilities ──────────────────────────────────────────── */
+.label-caps {
+  font-family: var(--font-space), var(--font-geist-sans), sans-serif;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
 
-.border-input  { border-color: var(--input); }
-.border-border { border-color: var(--border); }
-.ring-ring     { --tw-ring-color: var(--ring); }
+.font-data {
+  font-family: var(--font-space-mono), var(--font-geist-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
 
-.rounded-xl { border-radius: calc(var(--radius) + 4px); }
-.rounded-lg { border-radius: var(--radius); }
-.rounded-md { border-radius: calc(var(--radius) - 2px); }
-.rounded-sm { border-radius: calc(var(--radius) - 6px); }
+.font-ui {
+  font-family: var(--font-space), var(--font-geist-sans), sans-serif;
+}
 
-/* ── Scrollbar ──────────────────────────────────────── */
-::-webkit-scrollbar        { width: 5px; height: 5px; }
-::-webkit-scrollbar-track  { background: transparent; }
-::-webkit-scrollbar-thumb  { background-color: rgba(201,169,110,0.25); border-radius: 3px; }
+/* ── Corner marks — precision card framing ─────────────────────────── */
+.corner {
+  position: relative;
+}
+.corner::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: -1px;
+  width: 13px; height: 13px;
+  border-top: 1.5px solid var(--accent);
+  border-left: 1.5px solid var(--accent);
+  pointer-events: none;
+  z-index: 1;
+}
+.corner::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; right: -1px;
+  width: 13px; height: 13px;
+  border-bottom: 1.5px solid var(--accent);
+  border-right: 1.5px solid var(--accent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.corner-dim::before {
+  border-color: var(--border-hi);
+  border-width: 1px;
+}
+.corner-dim::after {
+  border-color: var(--border-hi);
+  border-width: 1px;
+}
+
+/* ── Grid texture background ───────────────────────────────────────── */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(123, 63, 237, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(123, 63, 237, 0.05) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+
+/* ── Surface helpers ───────────────────────────────────────────────── */
+.gm-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(123,63,237,0.04);
+}
+
+/* ── Button base ───────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--r-sm);
+  font-family: var(--font-space), var(--font-geist-sans), sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: all 0.15s var(--ease-out);
+  border: none;
+  outline: none;
+}
+.btn-accent {
+  background: var(--accent);
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+.btn-accent:hover {
+  background: var(--accent-hi);
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover {
+  background: var(--surface-2);
+  color: var(--text-1);
+  border-color: var(--border-hi);
+}
+
+/* ── Focus visible ──────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 1.5px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── Animations ─────────────────────────────────────────────────────── */
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px currentColor; }
+  50%       { opacity: 0.4; box-shadow: 0 0 2px currentColor; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Floating orbs for hero banner */
+@keyframes drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(30px, -18px) scale(1.08); }
+  66%       { transform: translate(-16px, 10px) scale(0.94); }
+}
+
+@keyframes drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  40%       { transform: translate(-24px, 14px) scale(1.1); }
+  70%       { transform: translate(20px, -8px) scale(0.9); }
+}
+
+@keyframes drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(18px, 22px) scale(1.12); }
+}
+
+@keyframes float-tag {
+  0%, 100% { transform: translateY(0px); opacity: 0.2; }
+  50%       { transform: translateY(-8px); opacity: 0.4; }
+}

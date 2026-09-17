@@ -3,13 +3,316 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model clientes_fixos {
+  id                   String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at           DateTime?            @default(now()) @db.Timestamptz(6)
+  nome                 String
+  email                String?
+  valor_mensal         Decimal              @db.Decimal
+  ativo                Boolean?             @default(true)
+  dia_vencimento       Int?
+  escopo_mensal        String?
+  observacoes_internas String?
+  data_inicio          DateTime?            @default(dbgenerated("CURRENT_DATE")) @db.Date
+  data_cancelamento    DateTime?            @db.Date
+  cnpj                 String?
+  razao_social         String?
+  telefone             String?
+  tipo                 String               @default("cliente")
+  portal_email         String?
+  portal_senha_hash    String?
+  portal_ativo         Boolean              @default(false)
+  logo_url             String?
+  documentos_cliente   documentos_cliente[]
+  estrategias          estrategias[]
+  metricas_mensais     metricas_mensais[]
+  pagamentos           pagamentos[]
+  propostas            propostas[]
+  tickets              tickets[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model configuracoes {
+  chave      String    @id
+  valor      String
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model despesas {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at           DateTime? @default(now()) @db.Timestamptz(6)
+  tipo                 String    @default("corporativa")
+  descricao            String
+  valor                Decimal   @db.Decimal(10, 2)
+  mes                  Int
+  ano                  Int
+  pago                 Boolean?  @default(false)
+  pago_em              DateTime? @db.Timestamptz(6)
+  vencimento           DateTime? @db.Date
+  recorrente           Boolean   @default(false)
+  recorrencia_meses    Int?
+  recorrencia_grupo_id String?   @db.Uuid
+
+  @@index([recorrencia_grupo_id], map: "despesas_recorrencia_grupo_idx")
+}
+
+model documentos_cliente {
+  id              String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at      DateTime       @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at      DateTime       @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  cliente_fixo_id String         @db.Uuid
+  titulo          String
+  blocos          Json           @default("[]")
+  visivel_portal  Boolean        @default(true)
+  clientes_fixos  clientes_fixos @relation(fields: [cliente_fixo_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([cliente_fixo_id], map: "documentos_cliente_cliente_fixo_idx")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model estrategias {
+  id              String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at      DateTime        @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at      DateTime        @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  cliente_fixo_id String?         @db.Uuid
+  titulo          String          @default("Nova Estratégia")
+  descricao       String?
+  nodes           Json            @default("[]")
+  edges           Json            @default("[]")
+  visivel_portal  Boolean         @default(false)
+  clientes_fixos  clientes_fixos? @relation(fields: [cliente_fixo_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([cliente_fixo_id], map: "estrategias_cliente_idx")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model eventos {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  titulo     String
+  descricao  String?
+  start_at   DateTime  @db.Timestamptz(6)
+  end_at     DateTime? @db.Timestamptz(6)
+  all_day    Boolean?  @default(false)
+  cor        String?   @default("slate")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model leads {
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at     DateTime?   @default(now()) @db.Timestamptz(6)
+  nome           String
+  empresa        String?
+  telefone       String?
+  canal          String?     @default("pessoal")
+  valor_estimado Decimal?    @db.Decimal(10, 2)
+  anotacoes      String?
+  status         String?     @default("contato")
+  convertido_em  DateTime?   @db.Timestamptz(6)
+  ticket_id      String?     @db.Uuid
+  tickets        tickets?    @relation(fields: [ticket_id], references: [id], onUpdate: NoAction)
+  propostas      propostas[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model metas {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  mes         Int
+  ano         Int
+  meta_fixo   Decimal?  @default(0) @db.Decimal(10, 2)
+  meta_avulso Decimal?  @default(0) @db.Decimal(10, 2)
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([mes, ano])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model metricas_mensais {
+  id                  String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at          DateTime?      @default(now()) @db.Timestamptz(6)
+  cliente_fixo_id     String         @db.Uuid
+  mes                 Int
+  ano                 Int
+  seguidores          Int?
+  engajamento_percent Decimal?       @db.Decimal(5, 2)
+  alcance             Int?
+  visualizacoes       Int?
+  extras              Json?          @default("{}")
+  observacoes         String?
+  clientes_fixos      clientes_fixos @relation(fields: [cliente_fixo_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([cliente_fixo_id, mes, ano])
+  @@index([cliente_fixo_id, ano(sort: Desc), mes(sort: Desc)], map: "idx_metricas_cliente_periodo")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model pagamentos {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at     DateTime?       @default(now()) @db.Timestamptz(6)
+  cliente_id     String?         @db.Uuid
+  mes            Int
+  ano            Int
+  valor          Decimal         @db.Decimal
+  recebido       Boolean?        @default(false)
+  recebido_em    DateTime?       @db.Timestamptz(6)
+  clientes_fixos clientes_fixos? @relation(fields: [cliente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([cliente_id, mes, ano])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model parceiros {
+  id                   String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at           DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at           DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  nome                 String
+  email                String
+  whatsapp             String
+  cidade               String?
+  como                 String?
+  status               String   @default("novo")
+  observacoes_internas String?
+
+  @@index([created_at(sort: Desc)])
+  @@index([status])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model propostas {
+  id                   String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at           DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?       @default(now()) @db.Timestamptz(6)
+  cliente_fixo_id      String?         @db.Uuid
+  lead_id              String?         @db.Uuid
+  cliente_nome         String
+  cliente_empresa      String?
+  cliente_email        String?
+  titulo               String
+  modalidade           String          @default("mensal")
+  escopo               String?
+  valor                Decimal?        @db.Decimal(10, 2)
+  prazo_dias           Int?
+  observacoes          String?
+  validade             DateTime?       @db.Date
+  status               String          @default("rascunho")
+  enviada_em           DateTime?       @db.Timestamptz(6)
+  resposta_em          DateTime?       @db.Timestamptz(6)
+  apresentacao         String?
+  visto_em             DateTime?       @db.Timestamptz(6)
+  aceito_por_nome      String?
+  aceito_por_email     String?
+  dados_fiscais_status String          @default("pendente")
+  cliente_cnpj         String?
+  cliente_razao_social String?
+  cliente_telefone     String?
+  dados_fiscais_em     DateTime?       @db.Timestamptz(6)
+  clientes_fixos       clientes_fixos? @relation(fields: [cliente_fixo_id], references: [id], onUpdate: NoAction)
+  leads                leads?          @relation(fields: [lead_id], references: [id], onUpdate: NoAction)
+
+  @@index([cliente_fixo_id], map: "idx_propostas_cliente_fixo")
+  @@index([lead_id], map: "idx_propostas_lead")
+  @@index([status], map: "idx_propostas_status")
+}
+
+model receitas_avulsas {
+  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at  DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at  DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  descricao   String
+  valor       Decimal   @db.Decimal
+  mes         Int
+  ano         Int
+  recebido    Boolean   @default(false)
+  recebido_em DateTime? @db.Timestamptz(6)
+
+  @@index([mes, ano])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model tempo_apontamentos {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  ticket_id  String    @db.Uuid
+  minutos    Int?
+  descricao  String?
+  data       DateTime? @default(dbgenerated("CURRENT_DATE")) @db.Date
+  started_at DateTime? @db.Timestamptz(6)
+  ativo      Boolean?  @default(false)
+  tickets    tickets   @relation(fields: [ticket_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([ticket_id], map: "idx_tempo_ticket")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model tickets {
+  id                 String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at         DateTime             @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at         DateTime             @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  client_name        String
+  client_email       String?
+  company            String?
+  request_type       String               @default("outro")
+  title              String
+  description        String?
+  where_used         String?
+  deadline           DateTime?            @db.Date
+  purpose            String?
+  expected_result    String?
+  status             String               @default("novo")
+  priority           String               @default("normal")
+  admin_notes        String?
+  chat_transcript    Json?                @default("[]")
+  scheduled_at       DateTime?            @db.Timestamptz(6)
+  budget_value       Decimal?             @db.Decimal
+  is_fixed_client    Boolean?             @default(false)
+  pagamento_recebido Boolean?             @default(false)
+  cliente_fixo_id    String?              @db.Uuid
+  visivel_portal     Boolean              @default(true)
+  nota_cliente       String?
+  nota_cliente_em    DateTime?            @db.Timestamptz(6)
+  leads              leads[]
+  tempo_apontamentos tempo_apontamentos[]
+  clientes_fixos     clientes_fixos?      @relation(fields: [cliente_fixo_id], references: [id], onUpdate: NoAction)
+
+  @@index([client_email])
+  @@index([created_at(sort: Desc)])
+  @@index([status])
 }
 
 // ============================================================
-// AUTH
+// GM & Co Tec — Auth (NextAuth + Prisma Adapter)
 // ============================================================
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+/// Uma conta = um tenant. O slug é o email de quem criou a conta.
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users User[]
+
+  @@map("tenants")
+}
 
 model User {
   id            String    @id @default(cuid())
@@ -19,12 +322,15 @@ model User {
   image         String?
   password      String?
   role          Role      @default(STAFF)
+  tenantId      String
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   accounts Account[]
   sessions Session[]
 
+  @@index([tenantId])
   @@map("users")
 }
 
@@ -59,304 +365,11 @@ model Session {
   @@map("sessions")
 }
 
-enum Role {
-  ADMIN
-  MANAGER
-  STAFF
-}
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
 
-// ============================================================
-// CATÁLOGO
-// ============================================================
-
-model Category {
-  id          String    @id @default(cuid())
-  name        String
-  slug        String    @unique
-  description String?
-  image       String?
-  parentId    String?
-  active      Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  parent   Category?  @relation("CategoryParent", fields: [parentId], references: [id])
-  children Category[] @relation("CategoryParent")
-  products Product[]
-
-  @@map("categories")
-}
-
-model Product {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  description String?
-  sku         String   @unique
-  price       Decimal  @db.Decimal(10, 2)
-  comparePrice Decimal? @db.Decimal(10, 2)
-  cost        Decimal? @db.Decimal(10, 2)
-  categoryId  String?
-  active      Boolean  @default(true)
-  featured    Boolean  @default(false)
-  images      String[]
-  tags        String[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  category   Category?       @relation(fields: [categoryId], references: [id])
-  variants   ProductVariant[]
-  orderItems OrderItem[]
-
-  @@map("products")
-}
-
-model ProductVariant {
-  id        String   @id @default(cuid())
-  productId String
-  sku       String   @unique
-  size      String?
-  color     String?
-  price     Decimal? @db.Decimal(10, 2)
-  stock     Int      @default(0)
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  product         Product          @relation(fields: [productId], references: [id], onDelete: Cascade)
-  orderItems      OrderItem[]
-  stockMovements  StockMovement[]
-  productionItems ProductionOrderItem[]
-
-  @@map("product_variants")
-}
-
-// ============================================================
-// ESTOQUE
-// ============================================================
-
-model StockMovement {
-  id        String            @id @default(cuid())
-  variantId String
-  type      StockMovementType
-  quantity  Int
-  reason    String?
-  reference String?
-  createdAt DateTime          @default(now())
-  createdBy String?
-
-  variant ProductVariant @relation(fields: [variantId], references: [id])
-
-  @@map("stock_movements")
-}
-
-enum StockMovementType {
-  IN
-  OUT
-  ADJUSTMENT
-  PRODUCTION
-  RETURN
-}
-
-// ============================================================
-// CLIENTES (CRM)
-// ============================================================
-
-model Customer {
-  id          String    @id @default(cuid())
-  name        String
-  email       String?   @unique
-  phone       String?
-  cpf         String?   @unique
-  birthDate   DateTime?
-  notes       String?
-  tags        String[]
-  source      String?
-  totalOrders Int       @default(0)
-  totalSpent  Decimal   @default(0) @db.Decimal(10, 2)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  addresses CustomerAddress[]
-  orders    Order[]
-  activities CustomerActivity[]
-
-  @@map("customers")
-}
-
-model CustomerAddress {
-  id         String   @id @default(cuid())
-  customerId String
-  label      String?
-  street     String
-  number     String
-  complement String?
-  district   String
-  city       String
-  state      String
-  zipCode    String
-  isDefault  Boolean  @default(false)
-  createdAt  DateTime @default(now())
-
-  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-
-  @@map("customer_addresses")
-}
-
-model CustomerActivity {
-  id          String   @id @default(cuid())
-  customerId  String
-  type        String
-  description String
-  metadata    Json?
-  createdAt   DateTime @default(now())
-  createdBy   String?
-
-  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-
-  @@map("customer_activities")
-}
-
-// ============================================================
-// PEDIDOS
-// ============================================================
-
-model Order {
-  id              String      @id @default(cuid())
-  orderNumber     String      @unique
-  customerId      String?
-  customerName    String
-  customerEmail   String?
-  customerPhone   String?
-  status          OrderStatus @default(PENDING)
-  paymentStatus   PaymentStatus @default(PENDING)
-  paymentMethod   String?
-  paymentId       String?
-  subtotal        Decimal     @db.Decimal(10, 2)
-  discount        Decimal     @default(0) @db.Decimal(10, 2)
-  shipping        Decimal     @default(0) @db.Decimal(10, 2)
-  total           Decimal     @db.Decimal(10, 2)
-  notes           String?
-  shippingAddress Json?
-  trackingCode    String?
-  source          OrderSource @default(WEBSITE)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  customer Customer? @relation(fields: [customerId], references: [id])
-  items    OrderItem[]
-  history  OrderHistory[]
-
-  @@map("orders")
-}
-
-model OrderItem {
-  id        String  @id @default(cuid())
-  orderId   String
-  productId String
-  variantId String?
-  name      String
-  sku       String
-  size      String?
-  color     String?
-  quantity  Int
-  price     Decimal @db.Decimal(10, 2)
-  total     Decimal @db.Decimal(10, 2)
-
-  order   Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product        @relation(fields: [productId], references: [id])
-  variant ProductVariant? @relation(fields: [variantId], references: [id])
-
-  @@map("order_items")
-}
-
-model OrderHistory {
-  id          String   @id @default(cuid())
-  orderId     String
-  status      String
-  description String?
-  createdAt   DateTime @default(now())
-  createdBy   String?
-
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-  @@map("order_history")
-}
-
-enum OrderStatus {
-  PENDING
-  CONFIRMED
-  IN_PRODUCTION
-  READY
-  SHIPPED
-  DELIVERED
-  CANCELLED
-  RETURNED
-}
-
-enum PaymentStatus {
-  PENDING
-  PAID
-  PARTIALLY_PAID
-  REFUNDED
-  FAILED
-}
-
-enum OrderSource {
-  WEBSITE
-  WHATSAPP
-  INSTAGRAM
-  IN_STORE
-  OTHER
-}
-
-// ============================================================
-// PEDIDOS DE PRODUÇÃO
-// ============================================================
-
-model ProductionOrder {
-  id          String               @id @default(cuid())
-  orderNumber String               @unique
-  status      ProductionStatus     @default(DRAFT)
-  priority    ProductionPriority   @default(NORMAL)
-  notes       String?
-  dueDate     DateTime?
-  startedAt   DateTime?
-  completedAt DateTime?
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
-  createdBy   String?
-
-  items ProductionOrderItem[]
-
-  @@map("production_orders")
-}
-
-model ProductionOrderItem {
-  id                String   @id @default(cuid())
-  productionOrderId String
-  variantId         String
-  quantity          Int
-  completed         Int      @default(0)
-  notes             String?
-
-  productionOrder ProductionOrder @relation(fields: [productionOrderId], references: [id], onDelete: Cascade)
-  variant         ProductVariant  @relation(fields: [variantId], references: [id])
-
-  @@map("production_order_items")
-}
-
-enum ProductionStatus {
-  DRAFT
-  PLANNED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-}
-
-enum ProductionPriority {
-  LOW
-  NORMAL
-  HIGH
-  URGENT
+  @@unique([identifier, token])
+  @@map("verification_tokens")
 }

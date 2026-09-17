@@ -12,7 +12,9 @@ const schema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, password } = schema.parse(body);
+    const parsed = schema.parse(body);
+    const name = parsed.name.trim();
+    const email = parsed.email.trim().toLowerCase();
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
@@ -22,9 +24,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const hashed = await bcrypt.hash(password, 12);
-    await prisma.user.create({
-      data: { name, email, password: hashed },
+    const hashed = await bcrypt.hash(parsed.password, 12);
+
+    await prisma.$transaction(async (tx) => {
+      const tenant = await tx.tenant.create({
+        data: { name, slug: email },
+      });
+      await tx.user.create({
+        data: {
+          name,
+          email,
+          password: hashed,
+          role: "ADMIN",
+          tenantId: tenant.id,
+        },
+      });
     });
 
     return NextResponse.json({ ok: true }, { status: 201 });

@@ -19,7 +19,8 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) return null;
 
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email: credentials.email.trim().toLowerCase() },
+          include: { tenant: true },
         });
 
         if (!user?.password) return null;
@@ -32,6 +33,9 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
+          tenantId: user.tenantId,
+          tenantName: user.tenant.name,
+          tenantSlug: user.tenant.slug,
         };
       },
     }),
@@ -42,6 +46,9 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }: { token: any; user: any }) {
       if (user) {
         token.role = user.role;
+        token.tenantId = user.tenantId;
+        token.tenantName = user.tenantName;
+        token.tenantSlug = user.tenantSlug;
       }
       return token;
     },
@@ -50,11 +57,14 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.sub;
         session.user.role = token.role;
+        session.user.tenantId = token.tenantId;
+        session.user.tenantName = token.tenantName;
+        session.user.tenantSlug = token.tenantSlug;
       }
       return session;
     },
   },
   pages: {
-    signIn: "/login",
+    signIn: "/demo",
   },
 };
