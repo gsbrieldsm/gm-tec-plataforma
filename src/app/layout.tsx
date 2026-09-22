@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Space_Grotesk, Space_Mono } from "next/font/google";
+import { Fraunces, Geist, Geist_Mono, Space_Grotesk, Space_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import React from "react";
 import "./globals.css";
@@ -26,6 +26,12 @@ const spaceMono = Space_Mono({
   weight: ["400", "700"],
 });
 
+const fraunces = Fraunces({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  display: "swap",
+});
+
 const univia = localFont({
   src: [
     { path: "../fonts/UniviaPro-Book.ttf",       weight: "400", style: "normal" },
@@ -44,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} ${univia.variable} ${spaceGrotesk.variable} ${spaceMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${univia.variable} ${spaceGrotesk.variable} ${spaceMono.variable} ${fraunces.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
