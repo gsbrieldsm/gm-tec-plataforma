@@ -158,6 +158,8 @@ export const DEMO_STORE_PRODUCTS: StoreProduct[] = MOCK_PRODUCTS.map(p => ({
   category: p.category,
   price: p.price,
   stock: totalStock(p),
+  sku: p.sku,
+  description: p.description,
   hue: p.hue,
   active: p.active,
 }));

@@ -17,6 +17,8 @@ export const productSchema = z.object({
   category: z.string().trim().max(40).default(""),
   price:    z.number().min(0).max(1_000_000),
   stock:    z.number().int().min(0).max(100_000).default(0),
+  sku:      z.string().trim().max(40).default(""),
+  description: z.string().trim().max(600).default(""),
   hue:      hexLoose.default("#7c3fed"),
   active:   z.boolean().default(true),
 });

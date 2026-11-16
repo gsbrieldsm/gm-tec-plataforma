@@ -156,7 +156,9 @@ export function StorefrontView({ brand, store, fallbackName, products, preview, 
             <h2 style={{ fontFamily: heading, fontSize: 26, fontWeight: brand.font === "elegante" ? 500 : 700, margin: 0, letterSpacing: "-0.02em" }}>
               Coleção
             </h2>
-            <span style={{ fontSize: 13, color: t.muted }}>{visible.length} peças</span>
+            <span style={{ fontSize: 13, color: t.muted }}>
+              {visible.length} {visible.length === 1 ? "peça" : "peças"}
+            </span>
           </div>
 
           <div className="sf-grid">
