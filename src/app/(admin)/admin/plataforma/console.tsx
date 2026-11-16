@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSession } from "next-auth/react";
 import {
   Search, Loader2, ExternalLink, ShieldAlert, ShieldCheck,
   Store, Package, Plug, Users, Globe,
@@ -15,6 +16,7 @@ type Filter = "todas" | "publicadas" | "rascunho" | "suspensas";
 const FILTERS: Filter[] = ["todas", "publicadas", "rascunho", "suspensas"];
 
 export function PlatformConsole() {
+  const { data: session }     = useSession();
   const [rows, setRows]       = useState<PlatformTenant[] | null>(null);
   const [error, setError]     = useState("");
   const [search, setSearch]   = useState("");
@@ -175,6 +177,7 @@ export function PlatformConsole() {
         <div className="plat-grid">
           {shown.map(t => {
             const owner = t.users[0];
+            const isSelf = t.id === session?.user?.tenantId;
             return (
               <div key={t.id} style={{
                 background: "var(--surface)",
@@ -243,10 +246,13 @@ export function PlatformConsole() {
 
                   <button
                     onClick={() => toggleSuspend(t)}
-                    disabled={busyId === t.id}
+                    disabled={busyId === t.id || isSelf}
+                    title={isSelf ? "Esta é a sua conta de operador" : undefined}
                     style={{
+                      opacity: isSelf ? 0.4 : 1,
+                      cursor: isSelf ? "not-allowed" : "pointer",
                       display: "inline-flex", alignItems: "center", gap: 6,
-                      fontFamily: UI, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                      fontFamily: UI, fontSize: 12, fontWeight: 600,
                       color: t.suspended ? "#059669" : "var(--red)",
                       background: t.suspended ? "rgba(5,150,105,0.08)" : "rgba(220,38,38,0.06)",
                       border: `1px solid ${t.suspended ? "rgba(5,150,105,0.3)" : "rgba(220,38,38,0.25)"}`,
