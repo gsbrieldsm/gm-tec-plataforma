@@ -148,3 +148,16 @@ export type Product = typeof MOCK_PRODUCTS[0];
 
 export const totalStock = (p: Product) => p.variants.reduce((a, v) => a + v.stock, 0);
 export const margin     = (p: Product) => Math.round((1 - p.cost / p.price) * 100);
+
+import type { StoreProduct } from "./tenant-settings";
+
+/** Catálogo de demonstração no formato da vitrine, usado enquanto o lojista não cadastra nada. */
+export const DEMO_STORE_PRODUCTS: StoreProduct[] = MOCK_PRODUCTS.map(p => ({
+  id: p.id,
+  name: p.name,
+  category: p.category,
+  price: p.price,
+  stock: totalStock(p),
+  hue: p.hue,
+  active: p.active,
+}));

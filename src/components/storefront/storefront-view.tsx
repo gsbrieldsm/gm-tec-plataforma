@@ -1,9 +1,7 @@
 import { ShoppingBag, Shirt, MessageCircle, Mail, AtSign, MapPin } from "lucide-react";
-import type { Product } from "@/lib/catalog";
-import { totalStock } from "@/lib/catalog";
 import {
   FONT_STACKS, RADIUS, readableOn,
-  type BrandSettings, type StoreSettings,
+  type BrandSettings, type StoreSettings, type StoreProduct,
 } from "@/lib/tenant-settings";
 
 const THEMES = {
@@ -27,7 +25,7 @@ type Props = {
   store: StoreSettings;
   /** Usado quando o lojista ainda não deu nome à loja. */
   fallbackName: string;
-  products: readonly Product[];
+  products: readonly StoreProduct[];
   /** Dentro da prévia das configurações: links inertes. */
   preview?: boolean;
   /** Dono vendo a própria loja antes de publicar. */
@@ -163,8 +161,8 @@ export function StorefrontView({ brand, store, fallbackName, products, preview, 
 
           <div className="sf-grid">
             {visible.map(p => {
-              const out = totalStock(p) === 0;
-              const link = wa(`Olá! Tenho interesse em ${p.name} (${p.sku}).`);
+              const out = p.stock === 0;
+              const link = wa(`Olá! Tenho interesse em ${p.name}.`);
               return (
                 <article key={p.id} style={{
                   background: t.surface, border: `1px solid ${t.border}`,

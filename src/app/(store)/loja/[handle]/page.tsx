@@ -4,7 +4,7 @@ import { cache } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { MOCK_PRODUCTS } from "@/lib/catalog";
+import { DEMO_STORE_PRODUCTS } from "@/lib/catalog";
 import { parseSettings } from "@/lib/tenant-settings";
 import { StorefrontView } from "@/components/storefront/storefront-view";
 
@@ -54,7 +54,7 @@ export default async function LojaPage({ params }: Params) {
       brand={store.settings.brand}
       store={store.settings.store}
       fallbackName={store.name}
-      products={MOCK_PRODUCTS}
+      products={store.settings.products.length ? store.settings.products : DEMO_STORE_PRODUCTS}
       draft={draft}
     />
   );

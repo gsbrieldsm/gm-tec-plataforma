@@ -5,17 +5,18 @@ import Link from "next/link";
 import {
   Palette, Store, CreditCard, Truck, Settings2, Upload, Trash2, X,
   ExternalLink, Smartphone, Monitor, ShieldCheck, BookOpen, Check,
-  CircleDashed, Loader2, CheckCircle2, Sparkles, Globe,
+  CircleDashed, Loader2, CheckCircle2, Sparkles, Globe, Tags, Plus,
 } from "lucide-react";
 import { apiUrl, BASE_PATH } from "@/lib/base-path";
-import { MOCK_PRODUCTS } from "@/lib/catalog";
+import { DEMO_STORE_PRODUCTS } from "@/lib/catalog";
 import {
   CATEGORY_META, INTEGRATIONS,
   type Integration, type IntegrationCategory, type IntegrationId,
 } from "@/lib/integrations";
 import {
-  PALETTES, FONT_STACKS, readableOn, suggestHandle,
-  type TenantSettings, type BrandSettings, type StoreSettings, type IntegrationStatus,
+  PALETTES, FONT_STACKS, PRODUCT_HUES, readableOn, suggestHandle,
+  type TenantSettings, type BrandSettings, type StoreSettings,
+  type IntegrationStatus, type StoreProduct,
 } from "@/lib/tenant-settings";
 import { StorefrontView } from "@/components/storefront/storefront-view";
 
@@ -24,10 +25,11 @@ const MONO = "var(--font-space-mono), var(--font-geist-mono), monospace";
 
 const LIST: readonly Integration[] = INTEGRATIONS;
 
-type Tab = "identidade" | "loja" | IntegrationCategory;
+type Tab = "identidade" | "loja" | "produtos" | IntegrationCategory;
 const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: "identidade", label: "Identidade visual", icon: Palette },
   { id: "loja",       label: "Loja online",       icon: Store },
+  { id: "produtos",   label: "Produtos",          icon: Tags },
   { id: "pagamentos", label: "Pagamentos",        icon: CreditCard },
   { id: "logistica",  label: "Logística",         icon: Truck },
   { id: "operacao",   label: "Operação",          icon: Settings2 },
@@ -220,19 +222,26 @@ export default function ConfiguracoesPage() {
         })}
       </div>
 
-      {(tab === "identidade" || tab === "loja") && (
+      {(tab === "identidade" || tab === "loja" || tab === "produtos") && (
         <div className="cfg-split">
           <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
-            {tab === "identidade"
-              ? <IdentityForm brand={s.brand} fallbackName={saved.name} onChange={setBrand} />
-              : <StoreForm
+            {tab === "identidade" ? (
+              <IdentityForm brand={s.brand} fallbackName={saved.name} onChange={setBrand} />
+            ) : tab === "produtos" ? (
+              <ProductsForm
+                products={s.products}
+                onChange={next => setDraft(d => d && ({ ...d, settings: { ...d.settings, products: next } }))}
+              />
+            ) : (
+              <StoreForm
                   store={s.store}
                   handle={draft.handle}
                   onHandle={h => setDraft(d => d && ({ ...d, handle: h }))}
                   onChange={setStore}
-                  host={origin}
-                  suggestion={suggestHandle(storeName)}
-                />}
+                host={origin}
+                suggestion={suggestHandle(storeName)}
+              />
+            )}
           </div>
           <PreviewPanel settings={s} fallbackName={saved.name} />
         </div>
@@ -577,6 +586,174 @@ function StoreForm({ store, handle, onHandle, onChange, host, suggestion }: {
   );
 }
 
+
+/* ═══ Produtos da vitrine ═════════════════════════════════════════ */
+
+function newId() {
+  return `p_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function ProductsForm({ products, onChange }: {
+  products: StoreProduct[]; onChange: (next: StoreProduct[]) => void;
+}) {
+  const patch = (id: string, p: Partial<StoreProduct>) =>
+    onChange(products.map(x => x.id === id ? { ...x, ...p } : x));
+  const remove = (id: string) => onChange(products.filter(x => x.id !== id));
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= products.length) return;
+    const next = [...products];
+    [next[i], next[j]] = [next[j], next[i]];
+    onChange(next);
+  };
+  const add = () => onChange([...products, {
+    id: newId(), name: "", category: "", price: 0, stock: 1,
+    hue: PRODUCT_HUES[products.length % PRODUCT_HUES.length], active: true,
+  }]);
+
+  return (
+    <>
+      <Section
+        title="Produtos da vitrine"
+        hint="O que aparece na loja. Enquanto estiver vazio, mostramos um catálogo de demonstração."
+      >
+        {products.length === 0 ? (
+          <div style={{
+            textAlign: "center", padding: "28px 20px", borderRadius: 12,
+            border: "1px dashed var(--border-hi)", background: "var(--surface-2)",
+          }}>
+            <Tags size={22} color="var(--accent)" />
+            <p style={{ fontFamily: UI, fontSize: 13, fontWeight: 700, color: "var(--text-1)", margin: "10px 0 4px" }}>
+              Nenhum produto cadastrado
+            </p>
+            <p style={{ fontFamily: UI, fontSize: 12, color: "var(--text-2)", margin: "0 0 16px", lineHeight: 1.5 }}>
+              A loja está mostrando o catálogo de demonstração. Cadastre o primeiro produto
+              para a vitrine virar a sua.
+            </p>
+            <button type="button" onClick={add} style={{
+              display: "inline-flex", alignItems: "center", gap: 7,
+              fontFamily: UI, fontSize: 13, fontWeight: 700, cursor: "pointer",
+              background: "var(--accent)", color: "#fff", border: "none",
+              borderRadius: 10, padding: "11px 20px", minHeight: 42,
+            }}>
+              <Plus size={15} /> Cadastrar produto
+            </button>
+            <div style={{ marginTop: 14 }}>
+              <button type="button" onClick={() => onChange(DEMO_STORE_PRODUCTS.map(p => ({ ...p, id: newId() })))}
+                style={linkBtn}>
+                ou começar a partir do catálogo de demonstração
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {products.map((p, i) => (
+              <div key={p.id} style={{
+                border: "1px solid var(--border)", borderRadius: 12,
+                background: p.active ? "var(--surface)" : "var(--surface-2)",
+                padding: 12, opacity: p.active ? 1 : 0.72,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                    <button type="button" onClick={() => move(i, -1)} disabled={i === 0}
+                      aria-label="Mover para cima" style={{ ...tinyBtn, opacity: i === 0 ? 0.3 : 1 }}>▲</button>
+                    <button type="button" onClick={() => move(i, 1)} disabled={i === products.length - 1}
+                      aria-label="Mover para baixo" style={{ ...tinyBtn, opacity: i === products.length - 1 ? 0.3 : 1 }}>▼</button>
+                  </div>
+                  <span aria-hidden style={{
+                    width: 34, height: 34, borderRadius: 9, flexShrink: 0,
+                    background: `linear-gradient(145deg, ${p.hue}3d, ${p.hue}14)`,
+                    border: `1px solid ${p.hue}55`,
+                  }} />
+                  <input
+                    aria-label={`Nome do produto ${i + 1}`}
+                    className="cfg-input" value={p.name} maxLength={80}
+                    placeholder="Nome do produto"
+                    onChange={e => patch(p.id, { name: e.target.value })}
+                    style={{ ...inputStyle, fontWeight: 600 }}
+                  />
+                  <button type="button" onClick={() => remove(p.id)} aria-label={`Remover ${p.name || "produto"}`}
+                    style={{ ...tinyBtn, width: 32, height: 32, color: "var(--red)" }}>
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 0.8fr", gap: 8 }}>
+                  <input aria-label="Categoria" className="cfg-input" value={p.category} maxLength={40}
+                    placeholder="Categoria" onChange={e => patch(p.id, { category: e.target.value })}
+                    style={{ ...inputStyle, fontSize: 12 }} />
+                  <input aria-label="Preço em reais" className="cfg-input" inputMode="decimal"
+                    value={p.price === 0 ? "" : String(p.price).replace(".", ",")}
+                    placeholder="R$ 0,00"
+                    onChange={e => {
+                      const n = Number(e.target.value.replace(/[^\d,.]/g, "").replace(",", "."));
+                      patch(p.id, { price: Number.isFinite(n) ? n : 0 });
+                    }}
+                    style={{ ...inputStyle, fontSize: 12, fontFamily: MONO }} />
+                  <input aria-label="Quantidade em estoque" className="cfg-input" inputMode="numeric"
+                    value={p.stock} placeholder="Qtd."
+                    onChange={e => patch(p.id, { stock: Math.max(0, parseInt(e.target.value.replace(/\D/g, "") || "0", 10)) })}
+                    style={{ ...inputStyle, fontSize: 12, fontFamily: MONO, textAlign: "center" }} />
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", gap: 4 }}>
+                    {PRODUCT_HUES.map(h => (
+                      <button key={h} type="button" onClick={() => patch(p.id, { hue: h })}
+                        aria-label={`Cor ${h}`} aria-pressed={p.hue === h}
+                        style={{
+                          width: 18, height: 18, borderRadius: "50%", cursor: "pointer", background: h,
+                          border: p.hue === h ? "2px solid var(--text-1)" : "1px solid rgba(0,0,0,0.12)",
+                        }} />
+                    ))}
+                  </div>
+                  <label style={{
+                    display: "inline-flex", alignItems: "center", gap: 6, marginLeft: "auto",
+                    fontFamily: UI, fontSize: 11.5, fontWeight: 600, color: "var(--text-2)", cursor: "pointer",
+                  }}>
+                    <input type="checkbox" checked={p.active}
+                      onChange={e => patch(p.id, { active: e.target.checked })} />
+                    Visível na loja
+                  </label>
+                </div>
+              </div>
+            ))}
+
+            <button type="button" onClick={add} style={{
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+              fontFamily: UI, fontSize: 12.5, fontWeight: 600, cursor: "pointer",
+              color: "var(--accent)", background: "transparent",
+              border: "1px dashed var(--border-hi)", borderRadius: 10, padding: "11px 14px",
+            }}>
+              <Plus size={14} /> Adicionar produto
+            </button>
+          </div>
+        )}
+      </Section>
+
+      {products.length > 0 && (
+        <div style={{
+          display: "flex", gap: 10, padding: "14px 16px", borderRadius: 12,
+          background: "var(--accent-bg)", border: "1px solid var(--border-hi)",
+        }}>
+          <Sparkles size={16} color="var(--accent)" style={{ flexShrink: 0, marginTop: 1 }} />
+          <p style={{ fontFamily: UI, fontSize: 12, lineHeight: 1.55, color: "var(--text-2)", margin: 0 }}>
+            Produtos com estoque zerado aparecem como <strong>esgotado</strong> em vez de sumir da vitrine.
+            Desmarque <strong>Visível na loja</strong> para tirar a peça do ar sem apagar o cadastro.
+          </p>
+        </div>
+      )}
+    </>
+  );
+}
+
+const tinyBtn: React.CSSProperties = {
+  width: 22, height: 16, borderRadius: 4, cursor: "pointer", flexShrink: 0,
+  background: "var(--surface-2)", border: "1px solid var(--border)",
+  color: "var(--text-3)", fontSize: 8, lineHeight: 1,
+  display: "flex", alignItems: "center", justifyContent: "center",
+};
+
 /* ═══ Prévia ══════════════════════════════════════════════════════ */
 
 function PreviewPanel({ settings, fallbackName }: { settings: TenantSettings; fallbackName: string }) {
@@ -593,7 +770,11 @@ function PreviewPanel({ settings, fallbackName }: { settings: TenantSettings; fa
   }, [mode]);
 
   const view = (
-    <StorefrontView brand={settings.brand} store={settings.store} fallbackName={fallbackName} products={MOCK_PRODUCTS} preview />
+    <StorefrontView
+      brand={settings.brand} store={settings.store} fallbackName={fallbackName}
+      products={settings.products.length ? settings.products : DEMO_STORE_PRODUCTS}
+      preview
+    />
   );
 
   return (

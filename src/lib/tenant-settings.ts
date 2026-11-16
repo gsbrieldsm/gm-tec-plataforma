@@ -2,12 +2,31 @@ import { z } from "zod";
 import { INTEGRATION_IDS } from "./integrations";
 
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Cor inválida");
+const hexLoose = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 
 // Só raster: SVG pode carregar script e a logo é exibida na loja pública.
 const LOGO_RE = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/;
 
 export const INTEGRATION_STATUS = ["pendente", "andamento", "pronto"] as const;
 export type IntegrationStatus = (typeof INTEGRATION_STATUS)[number];
+
+/** Produto da vitrine. Mora no JSON do tenant — sem tabela própria por enquanto. */
+export const productSchema = z.object({
+  id:       z.string().min(1).max(40),
+  name:     z.string().trim().min(1, "Dê um nome ao produto").max(80),
+  category: z.string().trim().max(40).default(""),
+  price:    z.number().min(0).max(1_000_000),
+  stock:    z.number().int().min(0).max(100_000).default(0),
+  hue:      hexLoose.default("#7c3fed"),
+  active:   z.boolean().default(true),
+});
+
+export type StoreProduct = z.infer<typeof productSchema>;
+
+export const PRODUCT_HUES = [
+  "#ec4899", "#8b5cf6", "#3b82f6", "#06b6d4",
+  "#10b981", "#f59e0b", "#d97706", "#64748b",
+];
 
 export const settingsSchema = z.object({
   brand: z.object({
@@ -31,6 +50,7 @@ export const settingsSchema = z.object({
     document:     z.string().trim().max(20).default(""),
   }).default({}),
   integrations: z.record(z.enum(INTEGRATION_IDS), z.enum(INTEGRATION_STATUS)).default({}),
+  products: z.array(productSchema).max(60).default([]),
 });
 
 export type TenantSettings = z.infer<typeof settingsSchema>;
