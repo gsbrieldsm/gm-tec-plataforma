@@ -8,7 +8,8 @@ import {
   CircleDashed, Loader2, CheckCircle2, Sparkles, Globe,
 } from "lucide-react";
 import { apiUrl, BASE_PATH } from "@/lib/base-path";
-import { DEMO_STORE_PRODUCTS } from "@/lib/catalog";
+import { DEMO_SHOP_ITEMS } from "@/lib/catalog";
+import type { ApiProduct } from "@/app/api/tenant/products/route";
 import {
   CATEGORY_META, INTEGRATIONS,
   type Integration, type IntegrationCategory, type IntegrationId,
@@ -17,7 +18,7 @@ import {
   PALETTES, FONT_STACKS, readableOn, suggestHandle,
   type TenantSettings, type BrandSettings, type StoreSettings, type IntegrationStatus,
 } from "@/lib/tenant-settings";
-import { StorefrontView } from "@/components/storefront/storefront-view";
+import { StorefrontView, type ShopItem } from "@/components/storefront/storefront-view";
 
 const UI   = "var(--font-space), var(--font-geist-sans), sans-serif";
 const MONO = "var(--font-space-mono), var(--font-geist-mono), monospace";
@@ -584,6 +585,20 @@ function StoreForm({ store, handle, onHandle, onChange, host, suggestion }: {
 
 function PreviewPanel({ settings, fallbackName }: { settings: TenantSettings; fallbackName: string }) {
   const [mode, setMode] = useState<"mobile" | "desktop">("mobile");
+  const [items, setItems] = useState<ShopItem[]>([]);
+
+  // A prévia mostra o catálogo real da loja; sem produto, cai no de exemplo.
+  useEffect(() => {
+    fetch(apiUrl("/api/tenant/products"))
+      .then(r => r.ok ? r.json() : { products: [] })
+      .then((d: { products: ApiProduct[] }) => setItems((d.products ?? []).filter(p => p.active).map(p => ({
+        id: p.id, name: p.name, category: p.category, priceCents: p.priceCents,
+        hue: p.hue, imageUrl: p.imageUrl, active: p.active,
+        sizes: p.variants.map(v => ({ label: v.size, stock: v.stock })),
+        stock: p.variants.reduce((a, v) => a + v.stock, 0),
+      }))))
+      .catch(() => setItems([]));
+  }, []);
   const boxRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.38);
 
@@ -598,7 +613,7 @@ function PreviewPanel({ settings, fallbackName }: { settings: TenantSettings; fa
   const view = (
     <StorefrontView
       brand={settings.brand} store={settings.store} fallbackName={fallbackName}
-      products={settings.products.length ? settings.products : DEMO_STORE_PRODUCTS}
+      products={items.length ? items : DEMO_SHOP_ITEMS}
       preview
     />
   );

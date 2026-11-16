@@ -4,7 +4,8 @@ import { cache } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { DEMO_STORE_PRODUCTS } from "@/lib/catalog";
+import { loadShopItems } from "@/lib/shop-items";
+import { DEMO_SHOP_ITEMS } from "@/lib/catalog";
 import { parseSettings } from "@/lib/tenant-settings";
 import { StorefrontView } from "@/components/storefront/storefront-view";
 
@@ -51,12 +52,13 @@ export default async function LojaPage({ params }: Params) {
   if (!resolved) notFound();
 
   const { store, draft } = resolved;
+  const items = await loadShopItems(store.id);
   return (
     <StorefrontView
       brand={store.settings.brand}
       store={store.settings.store}
       fallbackName={store.name}
-      products={store.settings.products.length ? store.settings.products : DEMO_STORE_PRODUCTS}
+      products={items.length ? items : DEMO_SHOP_ITEMS}
       draft={draft}
     />
   );

@@ -1,17 +1,28 @@
 import { ShoppingBag, Shirt, MessageCircle, Mail, AtSign, MapPin } from "lucide-react";
 import {
   FONT_STACKS, RADIUS, readableOn,
-  type BrandSettings, type StoreSettings, type StoreProduct,
+  type BrandSettings, type StoreSettings,
 } from "@/lib/tenant-settings";
+import { fmtCents, installment } from "@/lib/money";
+
+/** O que a vitrine precisa saber de um produto. */
+export type ShopItem = {
+  id: string;
+  name: string;
+  category: string;
+  priceCents: number;
+  hue: string;
+  imageUrl: string | null;
+  active: boolean;
+  /** Tamanhos com estoque, na ordem cadastrada. */
+  sizes: { label: string; stock: number }[];
+  stock: number;
+};
 
 const THEMES = {
   light: { bg: "#faf9f7", surface: "#ffffff", text: "#161616", muted: "#6b6b6b", border: "rgba(0,0,0,0.08)" },
   dark:  { bg: "#0e0e11", surface: "#17171b", text: "#f3f3f3", muted: "#9a9aa2", border: "rgba(255,255,255,0.09)" },
 };
-
-function fmtBRL(v: number) {
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
 
 function whatsappLink(raw: string, text: string) {
   const digits = raw.replace(/\D/g, "");
@@ -25,7 +36,7 @@ type Props = {
   store: StoreSettings;
   /** Usado quando o lojista ainda não deu nome à loja. */
   fallbackName: string;
-  products: readonly StoreProduct[];
+  products: readonly ShopItem[];
   /** Dentro da prévia das configurações: links inertes. */
   preview?: boolean;
   /** Dono vendo a própria loja antes de publicar. */
@@ -164,6 +175,8 @@ export function StorefrontView({ brand, store, fallbackName, products, preview, 
           <div className="sf-grid">
             {visible.map(p => {
               const out = p.stock === 0;
+              const sizes = p.sizes.filter(z => z.label);
+              const parc = installment(p.priceCents);
               const link = wa(`Olá! Tenho interesse em ${p.name}.`);
               return (
                 <article key={p.id} style={{
@@ -173,10 +186,19 @@ export function StorefrontView({ brand, store, fallbackName, products, preview, 
                 }}>
                   <div style={{
                     position: "relative", aspectRatio: "4 / 5",
-                    background: `linear-gradient(160deg, ${p.hue}2e 0%, ${p.hue}0d 100%)`,
+                    background: p.imageUrl
+                      ? t.surface
+                      : `linear-gradient(160deg, ${p.hue}2e 0%, ${p.hue}0d 100%)`,
                     display: "flex", alignItems: "center", justifyContent: "center",
+                    overflow: "hidden",
                   }}>
-                    <Shirt size={44} strokeWidth={1.2} color={`${p.hue}99`} />
+                    {p.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.imageUrl} alt={p.name} loading="lazy"
+                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                    ) : (
+                      <Shirt size={44} strokeWidth={1.2} color={`${p.hue}99`} />
+                    )}
                     {out && (
                       <span style={{
                         position: "absolute", top: 10, left: 10,
@@ -187,11 +209,33 @@ export function StorefrontView({ brand, store, fallbackName, products, preview, 
                     )}
                   </div>
                   <div style={{ padding: "14px 14px 16px", display: "flex", flexDirection: "column", gap: 4, flex: 1 }}>
-                    <span style={{ fontSize: 11.5, color: t.muted }}>{p.category}</span>
+                    {p.category && <span style={{ fontSize: 11.5, color: t.muted }}>{p.category}</span>}
                     <h3 style={{ fontSize: 14.5, fontWeight: 600, margin: 0, lineHeight: 1.3 }}>{p.name}</h3>
-                    <span style={{ fontSize: 15, fontWeight: 700, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
-                      {fmtBRL(p.price)}
+
+                    {sizes.length > 0 && (
+                      <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 6 }}>
+                        {sizes.map(sz => (
+                          <span key={sz.label} style={{
+                            fontSize: 10.5, fontWeight: 600, lineHeight: 1,
+                            padding: "4px 7px", borderRadius: r.button === 999 ? 999 : 5,
+                            border: `1px solid ${sz.stock > 0 ? t.border : "transparent"}`,
+                            color: sz.stock > 0 ? t.text : t.muted,
+                            opacity: sz.stock > 0 ? 1 : 0.45,
+                            textDecoration: sz.stock > 0 ? "none" : "line-through",
+                          }}>{sz.label}</span>
+                        ))}
+                      </div>
+                    )}
+
+                    <span style={{ fontSize: 15, fontWeight: 700, marginTop: 8, fontVariantNumeric: "tabular-nums" }}>
+                      {fmtCents(p.priceCents)}
                     </span>
+                    {parc && (
+                      <span style={{ fontSize: 11.5, color: t.muted, fontVariantNumeric: "tabular-nums" }}>
+                        ou {parc.n}x de {fmtCents(parc.cents)}
+                      </span>
+                    )}
+
                     <div style={{ marginTop: "auto", paddingTop: 12 }}>
                       {out ? (
                         <span className="sf-card-btn" style={{ ...btn(false), width: "100%", boxSizing: "border-box", color: t.muted, cursor: "default" }}>

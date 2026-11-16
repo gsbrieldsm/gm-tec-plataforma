@@ -150,6 +150,7 @@ export const totalStock = (p: Product) => p.variants.reduce((a, v) => a + v.stoc
 export const margin     = (p: Product) => Math.round((1 - p.cost / p.price) * 100);
 
 import type { StoreProduct } from "./tenant-settings";
+import type { ShopItem } from "@/components/storefront/storefront-view";
 
 /** Catálogo de demonstração no formato da vitrine, usado enquanto o lojista não cadastra nada. */
 export const DEMO_STORE_PRODUCTS: StoreProduct[] = MOCK_PRODUCTS.map(p => ({
@@ -162,4 +163,17 @@ export const DEMO_STORE_PRODUCTS: StoreProduct[] = MOCK_PRODUCTS.map(p => ({
   description: p.description,
   hue: p.hue,
   active: p.active,
+}));
+
+/** Vitrine de exemplo, para a loja nunca aparecer vazia antes do primeiro cadastro. */
+export const DEMO_SHOP_ITEMS: ShopItem[] = DEMO_STORE_PRODUCTS.map(p => ({
+  id: p.id,
+  name: p.name,
+  category: p.category,
+  priceCents: Math.round(p.price * 100),
+  hue: p.hue,
+  imageUrl: null,
+  active: p.active,
+  sizes: [],
+  stock: p.stock,
 }));
