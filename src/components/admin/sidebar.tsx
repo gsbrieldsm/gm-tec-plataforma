@@ -23,8 +23,16 @@ const OPERACOES: NavItem[] = [
 ];
 
 const ANALYTICS: NavItem[] = [
-  { label: "Relatórios",    href: "/admin/relatorios" },
-  { label: "Configurações", href: "/admin/configuracoes" },
+  { label: "Relatórios", href: "/admin/relatorios" },
+];
+
+const LOJA: NavItem[] = [
+  { label: "Configurações da Loja", href: "/admin/configuracoes" },
+];
+
+/** Só o operador da plataforma enxerga. */
+const PLATAFORMA: NavItem[] = [
+  { label: "Todas as lojas", href: "/admin/plataforma" },
 ];
 
 const CHANNELS = [
@@ -110,6 +118,7 @@ export function AdminSidebar({ open = false, onClose }: { open?: boolean; onClos
   // Uma conta = um tenant, identificado pelo email — por isso o email aqui
   // e não o nome do tenant, que repetiria a linha de cima.
   const tenant  = session?.user?.tenantSlug ?? session?.user?.email ?? "";
+  const isSuper = session?.user?.role === "SUPERADMIN";
 
   const active = (href: string) =>
     pathname === href || (href !== "/admin" && pathname.startsWith(href));
@@ -265,6 +274,28 @@ export function AdminSidebar({ open = false, onClose }: { open?: boolean; onClos
             ))}
           </div>
         </div>
+
+        {/* LOJA ONLINE */}
+        <div>
+          <SectionHeader prefix="WEB" label="Minha loja" />
+          <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            {LOJA.map(item => (
+              <NavLink key={item.href} href={item.href} label={item.label} active={active(item.href)} />
+            ))}
+          </div>
+        </div>
+
+        {/* PLATAFORMA — só operador */}
+        {isSuper && (
+          <div>
+            <SectionHeader prefix="GM" label="Plataforma" />
+            <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {PLATAFORMA.map(item => (
+                <NavLink key={item.href} href={item.href} label={item.label} active={active(item.href)} />
+              ))}
+            </div>
+          </div>
+        )}
 
       </nav>
 

@@ -297,6 +297,7 @@ model tickets {
 // ============================================================
 
 enum Role {
+  SUPERADMIN
   ADMIN
   STAFF
 }
@@ -310,6 +311,8 @@ model Tenant {
   handle    String?  @unique
   /// Identidade visual, dados da loja e status das integrações (validado em src/lib/tenant-settings.ts)
   settings  Json     @default("{}")
+  /// Suspensa pelo operador: tira a loja do ar sem apagar nada
+  suspended Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

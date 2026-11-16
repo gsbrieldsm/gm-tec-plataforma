@@ -13,7 +13,7 @@ type Params = { params: Promise<{ handle: string }> };
 const loadStore = cache(async (handle: string) => {
   const tenant = await prisma.tenant.findUnique({
     where: { handle: handle.toLowerCase() },
-    select: { id: true, name: true, settings: true },
+    select: { id: true, name: true, settings: true, suspended: true },
   });
   if (!tenant) return null;
   return { ...tenant, settings: parseSettings(tenant.settings) };
@@ -23,6 +23,8 @@ const loadStore = cache(async (handle: string) => {
 async function resolveStore(handle: string) {
   const store = await loadStore(handle);
   if (!store) return null;
+  // Suspensa pelo operador: some para todo mundo, inclusive para o dono.
+  if (store.suspended) return null;
   if (store.settings.store.published) return { store, draft: false };
 
   const session = await getServerSession(authOptions);
