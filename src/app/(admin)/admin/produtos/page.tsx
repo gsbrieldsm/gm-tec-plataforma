@@ -4,9 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Search, X, Plus, Shirt, Trash2, Loader2, ExternalLink,
-  AlertTriangle, PackageOpen, ImageIcon,
+  AlertTriangle, PackageOpen,
 } from "lucide-react";
 import { apiUrl } from "@/lib/base-path";
+import { ImageField } from "@/components/admin/image-field";
 import { fmtCents, parseMoney, centsToInput } from "@/lib/money";
 import { PRODUCT_HUES } from "@/lib/tenant-settings";
 import type { ApiProduct, ApiVariant } from "@/app/api/tenant/products/route";
@@ -474,16 +475,7 @@ function ProductDrawer({ draft, onChange, onClose, onSaved }: {
             </p>
           </div>
 
-          <Field id="pd-img" label="Foto do produto">
-            <input id="pd-img" className="pi" value={draft.imageUrl ?? ""} maxLength={600}
-              placeholder="Cole o link da imagem (temporário)"
-              onChange={e => set({ imageUrl: e.target.value || null })}
-              style={{ ...inputStyle, fontSize: 12 }} />
-            <p style={{ fontSize: 11, color: "var(--text-3)", margin: "6px 0 0", lineHeight: 1.5, display: "flex", gap: 6 }}>
-              <ImageIcon size={12} style={{ flexShrink: 0, marginTop: 1 }} />
-              Envio de arquivo entra em breve. Por ora, cole um link direto da imagem — use foto em pé, 4:5.
-            </p>
-          </Field>
+          <ImageField value={draft.imageUrl} onChange={url => set({ imageUrl: url })} />
 
           <Field id="pd-desc" label="Descrição" counter={`${draft.description.length}/600`}>
             <textarea id="pd-desc" className="pi" value={draft.description} maxLength={600} rows={3}
