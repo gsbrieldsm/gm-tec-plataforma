@@ -35,6 +35,9 @@ export async function uploadImage(
   const res = await fetch(`${cfg.url}/storage/v1/object/${BUCKET}/${path}`, {
     method: "POST",
     headers: {
+      // As chaves novas (sb_secret_…) pedem apikey; a service_role legada
+      // aceita os dois. Mandar ambos faz as duas formas funcionarem.
+      apikey: cfg.key,
       Authorization: `Bearer ${cfg.key}`,
       "Content-Type": contentType,
       "x-upsert": "true",
@@ -58,6 +61,6 @@ export async function deleteImage(path: string) {
   if (!cfg) return;
   await fetch(`${cfg.url}/storage/v1/object/${BUCKET}/${path}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${cfg.key}` },
+    headers: { apikey: cfg.key, Authorization: `Bearer ${cfg.key}` },
   }).catch(() => {});
 }
