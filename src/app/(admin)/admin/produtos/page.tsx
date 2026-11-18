@@ -10,6 +10,7 @@ import { apiUrl } from "@/lib/base-path";
 import { ImageField } from "@/components/admin/image-field";
 import { fmtCents, parseMoney, centsToInput } from "@/lib/money";
 import { PRODUCT_HUES } from "@/lib/tenant-settings";
+import { PHOTO_ASPECT } from "@/lib/photo";
 import type { ApiProduct, ApiVariant } from "@/lib/product-schema";
 
 const UI   = "var(--font-space), var(--font-geist-sans), sans-serif";
@@ -230,7 +231,7 @@ export default function ProdutosPage() {
                   border: "1px solid var(--border)", boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
                 }}>
                   <div style={{
-                    position: "relative", aspectRatio: "4 / 5",
+                    position: "relative", aspectRatio: PHOTO_ASPECT,
                     background: p.imageUrl ? "var(--surface-2)"
                       : `linear-gradient(135deg, ${p.hue}26 0%, ${p.hue}0a 60%, var(--surface-2) 100%)`,
                     borderBottom: "1px solid var(--border)",

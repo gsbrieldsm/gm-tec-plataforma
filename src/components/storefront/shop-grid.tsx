@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Shirt, X, ShoppingBag, MessageCircle, ChevronLeft, ChevronRight, Tag, Trash2 } from "lucide-react";
 import { fmtCents, installment } from "@/lib/money";
 import type { ShopItem } from "./storefront-view";
+import { PHOTO_ASPECT, PHOTO_DETAIL_MAX_H } from "@/lib/photo";
 
 export type ShopUI = {
   surface: string; text: string; muted: string; border: string;
@@ -107,7 +108,7 @@ export function ShopGrid({ products, ui, whatsapp, reseller, preview, storeName 
                 className="sg-thumb"
                 onClick={() => !preview && setOpen(p)}
                 style={{
-                  position: "relative", aspectRatio: "4 / 5",
+                  position: "relative", aspectRatio: PHOTO_ASPECT,
                   background: photos.length ? ui.surface
                     : `linear-gradient(160deg, ${p.hue}2e 0%, ${p.hue}0d 100%)`,
                   display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
@@ -244,7 +245,10 @@ function Detail({ p, ui, pct, onClose, onAdd }: {
 
         {/* galeria */}
         <div style={{ background: `${p.hue}0f` }}>
-          <div style={{ position: "relative", aspectRatio: "4 / 5", overflow: "hidden" }}>
+          <div style={{
+            position: "relative", aspectRatio: PHOTO_ASPECT,
+            maxHeight: PHOTO_DETAIL_MAX_H, overflow: "hidden",
+          }}>
             {photos.length ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={photos[shot]} alt={p.name}
@@ -271,7 +275,7 @@ function Detail({ p, ui, pct, onClose, onAdd }: {
                 <button key={src + i} type="button" onClick={() => setShot(i)}
                   aria-label={`Foto ${i + 1}`}
                   style={{
-                    flexShrink: 0, width: 52, aspectRatio: "4 / 5", padding: 0, cursor: "pointer",
+                    flexShrink: 0, width: 44, aspectRatio: PHOTO_ASPECT, padding: 0, cursor: "pointer",
                     borderRadius: 7, overflow: "hidden", background: "none",
                     border: `2px solid ${i === shot ? ui.primary : ui.border}`,
                   }}>

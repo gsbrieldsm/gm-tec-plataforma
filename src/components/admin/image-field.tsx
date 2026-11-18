@@ -4,17 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import { ImageIcon, Loader2, Trash2, Upload, Star, ArrowLeft, ArrowRight } from "lucide-react";
 import { apiUrl } from "@/lib/base-path";
 import type { ApiImage } from "@/lib/product-schema";
+import { PHOTO_ASPECT, PHOTO_RATIO, PHOTO_MAX_W } from "@/lib/photo";
 
 const UI = "var(--font-space), var(--font-geist-sans), sans-serif";
 
-/** Vitrine mostra a foto em pé; cortar aqui evita peça esticada na loja. */
-const ASPECT = 4 / 5;
-const MAX_W = 1200;
 const MAX_PHOTOS = 8;
 
 /**
- * Corta no centro em 4:5 e comprime, tudo no navegador. Foto de celular tem
- * 4 MB; depois disto tem ~200 KB, que é o que a cliente final baixa.
+ * Corta no centro na proporção da vitrine e comprime, tudo no navegador.
+ * Foto de celular tem 4 MB; depois disto sobra uma fração, que é o que a
+ * cliente final baixa.
  */
 function prepare(file: File): Promise<Blob> {
   return new Promise((resolve, reject) => {
@@ -25,13 +24,13 @@ function prepare(file: File): Promise<Blob> {
       let sw = img.naturalWidth, sh = img.naturalHeight;
       if (!sw || !sh) return reject(new Error("Imagem inválida."));
 
-      if (sw / sh > ASPECT) sw = Math.round(sh * ASPECT);
-      else sh = Math.round(sw / ASPECT);
+      if (sw / sh > PHOTO_RATIO) sw = Math.round(sh * PHOTO_RATIO);
+      else sh = Math.round(sw / PHOTO_RATIO);
       const sx = (img.naturalWidth - sw) / 2;
       const sy = (img.naturalHeight - sh) / 2;
 
-      const w = Math.min(sw, MAX_W);
-      const h = Math.round(w / ASPECT);
+      const w = Math.min(sw, PHOTO_MAX_W);
+      const h = Math.round(w / PHOTO_RATIO);
       const canvas = document.createElement("canvas");
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext("2d");
@@ -113,7 +112,7 @@ export function ImageField({ value, onChange }: Props) {
       <style>{`
         .imgf-spin { animation: imgf-spin 1s linear infinite; }
         @keyframes imgf-spin { to { transform: rotate(360deg); } }
-        .imgf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 9px; }
+        .imgf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 9px; }
         .imgf-tile .imgf-tools { opacity: 0; transition: opacity .15s ease; }
         .imgf-tile:hover .imgf-tools, .imgf-tile:focus-within .imgf-tools { opacity: 1; }
       `}</style>
@@ -140,7 +139,7 @@ export function ImageField({ value, onChange }: Props) {
           <div className="imgf-grid">
             {value.map((im, i) => (
               <div key={(im.id ?? "") + im.url} className="imgf-tile" style={{
-                position: "relative", aspectRatio: "4 / 5", borderRadius: 9, overflow: "hidden",
+                position: "relative", aspectRatio: PHOTO_ASPECT, borderRadius: 9, overflow: "hidden",
                 background: "var(--surface-2)", border: i === 0 ? "2px solid var(--accent)" : "1px solid var(--border)",
               }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -170,7 +169,7 @@ export function ImageField({ value, onChange }: Props) {
 
             {busy > 0 && Array.from({ length: busy }).map((_, i) => (
               <div key={`up${i}`} style={{
-                aspectRatio: "4 / 5", borderRadius: 9, border: "1px dashed var(--border-hi)",
+                aspectRatio: PHOTO_ASPECT, borderRadius: 9, border: "1px dashed var(--border-hi)",
                 display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-3)",
               }}><Loader2 size={16} className="imgf-spin" /></div>
             ))}
@@ -197,8 +196,9 @@ export function ImageField({ value, onChange }: Props) {
               {busy > 0 ? `Enviando ${busy}…` : value.length ? "Adicionar fotos" : "Escolher fotos"}
             </button>
             <p style={{ fontSize: 11, color: "var(--text-3)", margin: 0, lineHeight: 1.5, flex: 1, minWidth: 180 }}>
-              Arraste várias de uma vez. Corto em 4:5 e comprimo sozinho — pode mandar
-              a foto do celular do jeito que está.
+              Arraste várias de uma vez. Corto no formato 9:16 e comprimo sozinho —
+              é o mesmo enquadramento de Stories, então pode mandar a foto do celular
+              do jeito que está.
             </p>
           </div>
         )}
