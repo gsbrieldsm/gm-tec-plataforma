@@ -34,7 +34,7 @@ export default function DemoPage() {
 function DemoForm() {
   const router = useRouter();
   const [step, setStep] = useState<"register" | "login">("register");
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", storeName: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -204,6 +204,7 @@ function DemoForm() {
         }
         .field-input:focus { border-color: ${C.indigo}; }
         .field-input::placeholder { color: ${C.text3}; }
+        .field-hint { font-size: 11.5px; color: ${C.text3}; margin: 6px 0 0; line-height: 1.5; }
 
         .btn-primary {
           width: 100%;
@@ -313,6 +314,21 @@ function DemoForm() {
                       required
                       autoFocus
                     />
+                  </div>
+                  <div>
+                    <label className="field-label">Nome da loja</label>
+                    <input
+                      className="field-input"
+                      type="text"
+                      placeholder="Amoriê"
+                      value={form.storeName}
+                      onChange={(e) => set("storeName", e.target.value)}
+                      required
+                    />
+                    <p className="field-hint">
+                      É este nome que aparece na sua loja online. Pode ser diferente do seu
+                      nome e da sua empresa, e você troca depois quando quiser.
+                    </p>
                   </div>
                   <div>
                     <label className="field-label">Email</label>

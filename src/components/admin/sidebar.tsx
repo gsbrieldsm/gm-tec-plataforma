@@ -117,9 +117,12 @@ export function AdminSidebar({ open = false, onClose }: { open?: boolean; onClos
   const { data: session } = useSession();
   const name    = session?.user?.name ?? session?.user?.email ?? "Usuário";
   const initial = name.charAt(0).toUpperCase();
-  // Uma conta = um tenant, identificado pelo email — por isso o email aqui
-  // e não o nome do tenant, que repetiria a linha de cima.
-  const tenant  = session?.user?.tenantSlug ?? session?.user?.email ?? "";
+  // Com equipe, várias pessoas dividem a mesma loja: aqui vai o negócio,
+  // não o email de quem está logado — que já aparece na linha de cima.
+  const tenant  = session?.user?.tenantName
+    || session?.user?.tenantSlug
+    || session?.user?.email
+    || "";
   const isSuper = session?.user?.role === "SUPERADMIN";
 
   const active = (href: string) =>

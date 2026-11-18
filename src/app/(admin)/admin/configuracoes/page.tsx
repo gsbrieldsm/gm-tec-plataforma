@@ -329,11 +329,17 @@ function IdentityForm({ brand, fallbackName, onChange }: {
 
   return (
     <>
-      <Section title="Nome e mensagem" hint="Aparecem no topo da loja e no título da página.">
+      <Section title="Nome e mensagem" hint="O nome da loja online não precisa ser o seu nem o da sua empresa — é só o que o cliente vê.">
         <div className="cfg-grid-2">
-          <Field id="cfg-name" label="Nome da loja">
+          <Field id="cfg-name" label="Nome da loja online">
             <input id="cfg-name" className="cfg-input" value={brand.storeName} maxLength={60}
               placeholder={fallbackName} onChange={e => onChange({ storeName: e.target.value })} style={inputStyle} />
+            {!brand.storeName && (
+              <p style={{ fontSize: 11.5, color: "#d97706", margin: "6px 0 0", lineHeight: 1.5 }}>
+                Em branco, a loja aparece como “{fallbackName}”. Escreva aqui o nome
+                que o cliente deve ver.
+              </p>
+            )}
           </Field>
           <Field id="cfg-tagline" label="Frase de destaque" counter={`${brand.tagline.length}/120`}>
             <input id="cfg-tagline" className="cfg-input" value={brand.tagline} maxLength={120}
