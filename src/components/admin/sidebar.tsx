@@ -28,6 +28,8 @@ const ANALYTICS: NavItem[] = [
 
 const LOJA: NavItem[] = [
   { label: "Configurações da Loja", href: "/admin/configuracoes" },
+  { label: "Lojistas",              href: "/admin/lojistas" },
+  { label: "Equipe",                href: "/admin/equipe" },
 ];
 
 /** Só o operador da plataforma enxerga. */

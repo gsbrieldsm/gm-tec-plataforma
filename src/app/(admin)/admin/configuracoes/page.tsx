@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { apiUrl, BASE_PATH } from "@/lib/base-path";
 import { DEMO_SHOP_ITEMS } from "@/lib/catalog";
-import type { ApiProduct } from "@/app/api/tenant/products/route";
+import type { ApiProduct } from "@/lib/product-schema";
 import {
   CATEGORY_META, INTEGRATIONS,
   type Integration, type IntegrationCategory, type IntegrationId,
@@ -594,6 +594,7 @@ function PreviewPanel({ settings, fallbackName }: { settings: TenantSettings; fa
       .then((d: { products: ApiProduct[] }) => setItems((d.products ?? []).filter(p => p.active).map(p => ({
         id: p.id, name: p.name, category: p.category, priceCents: p.priceCents,
         hue: p.hue, imageUrl: p.imageUrl, active: p.active,
+        photos: p.images.map(i => i.url), description: p.description,
         sizes: p.variants.map(v => ({ label: v.size, stock: v.stock })),
         stock: p.variants.reduce((a, v) => a + v.stock, 0),
       }))))

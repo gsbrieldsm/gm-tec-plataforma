@@ -10,7 +10,7 @@ import { apiUrl } from "@/lib/base-path";
 import { ImageField } from "@/components/admin/image-field";
 import { fmtCents, parseMoney, centsToInput } from "@/lib/money";
 import { PRODUCT_HUES } from "@/lib/tenant-settings";
-import type { ApiProduct, ApiVariant } from "@/app/api/tenant/products/route";
+import type { ApiProduct, ApiVariant } from "@/lib/product-schema";
 
 const UI   = "var(--font-space), var(--font-geist-sans), sans-serif";
 const MONO = "var(--font-space-mono), var(--font-geist-mono), monospace";
@@ -27,7 +27,8 @@ const SIZE_PRESETS: Record<string, string[]> = {
   "Tamanho único": ["Único"],
 };
 
-type Draft = Omit<ApiProduct, "id"> & { id: string | null };
+type DraftImage = { id?: string; url: string; path: string };
+type Draft = Omit<ApiProduct, "id" | "images"> & { id: string | null; images: DraftImage[] };
 
 const totalStock = (p: { variants: { stock: number }[] }) =>
   p.variants.reduce((a, v) => a + v.stock, 0);
@@ -45,6 +46,7 @@ function emptyDraft(position: number): Draft {
     priceCents: 0, hue: PRODUCT_HUES[position % PRODUCT_HUES.length],
     imageUrl: null, active: true, position,
     variants: [{ id: "", size: "", color: "", sku: "", stock: 0, position: 0 }],
+    images: [],
   };
 }
 
@@ -338,8 +340,12 @@ function ProductDrawer({ draft, onChange, onClose, onSaved }: {
       const body = {
         name: draft.name, category: draft.category, sku: draft.sku,
         description: draft.description, priceCents: draft.priceCents,
-        hue: draft.hue, imageUrl: draft.imageUrl || null,
+        hue: draft.hue,
         active: draft.active, position: draft.position,
+        images: draft.images.map(im => ({
+          ...(im.id ? { id: im.id } : {}),
+          url: im.url, path: im.path,
+        })),
         variants: draft.variants.map(v => ({
           ...(v.id ? { id: v.id } : {}),
           size: v.size, color: v.color, sku: v.sku, stock: v.stock,
@@ -475,7 +481,7 @@ function ProductDrawer({ draft, onChange, onClose, onSaved }: {
             </p>
           </div>
 
-          <ImageField value={draft.imageUrl} onChange={url => set({ imageUrl: url })} />
+          <ImageField value={draft.images} onChange={images => set({ images })} />
 
           <Field id="pd-desc" label="Descrição" counter={`${draft.description.length}/600`}>
             <textarea id="pd-desc" className="pi" value={draft.description} maxLength={600} rows={3}

@@ -8,6 +8,7 @@ import { loadShopItems } from "@/lib/shop-items";
 import { DEMO_SHOP_ITEMS } from "@/lib/catalog";
 import { parseSettings } from "@/lib/tenant-settings";
 import { StorefrontView } from "@/components/storefront/storefront-view";
+import { currentReseller } from "@/lib/reseller-auth";
 
 type Params = { params: Promise<{ handle: string }> };
 
@@ -52,7 +53,10 @@ export default async function LojaPage({ params }: Params) {
   if (!resolved) notFound();
 
   const { store, draft } = resolved;
-  const items = await loadShopItems(store.id);
+  const [items, reseller] = await Promise.all([
+    loadShopItems(store.id),
+    currentReseller(store.id),
+  ]);
   return (
     <StorefrontView
       brand={store.settings.brand}
@@ -60,6 +64,8 @@ export default async function LojaPage({ params }: Params) {
       fallbackName={store.name}
       products={items.length ? items : DEMO_SHOP_ITEMS}
       draft={draft}
+      reseller={reseller}
+      handle={handle.toLowerCase()}
     />
   );
 }

@@ -1,9 +1,11 @@
-import { ShoppingBag, Shirt, MessageCircle, Mail, AtSign, MapPin } from "lucide-react";
+import Link from "next/link";
+import { Store, MessageCircle, Mail, AtSign, MapPin, LogOut } from "lucide-react";
+import { ShopGrid, type ResellerView, type ShopUI } from "./shop-grid";
 import {
   FONT_STACKS, RADIUS, readableOn,
   type BrandSettings, type StoreSettings,
 } from "@/lib/tenant-settings";
-import { fmtCents, installment } from "@/lib/money";
+
 
 /** O que a vitrine precisa saber de um produto. */
 export type ShopItem = {
@@ -12,7 +14,11 @@ export type ShopItem = {
   category: string;
   priceCents: number;
   hue: string;
+  /** Capa — primeira da galeria, mantida para compatibilidade. */
   imageUrl: string | null;
+  /** Galeria completa, na ordem cadastrada. */
+  photos: string[];
+  description: string;
   active: boolean;
   /** Tamanhos com estoque, na ordem cadastrada. */
   sizes: { label: string; stock: number }[];
@@ -41,9 +47,13 @@ type Props = {
   preview?: boolean;
   /** Dono vendo a própria loja antes de publicar. */
   draft?: boolean;
+  /** Lojista logado nesta loja, se houver. */
+  reseller?: ResellerView;
+  /** Endereço público, para montar o link da área do lojista. */
+  handle?: string;
 };
 
-export function StorefrontView({ brand, store, fallbackName, products, preview, draft }: Props) {
+export function StorefrontView({ brand, store, fallbackName, products, preview, draft, reseller, handle }: Props) {
   const t = THEMES[brand.theme];
   const r = RADIUS[brand.radius];
   const heading = FONT_STACKS[brand.font];
@@ -53,6 +63,14 @@ export function StorefrontView({ brand, store, fallbackName, products, preview, 
   const visible = products.filter(p => p.active);
   const wa = (text: string) => whatsappLink(store.whatsapp, text);
   const ig = store.instagram.replace(/^@/, "");
+
+  const ui: ShopUI = {
+    surface: t.surface, text: t.text, muted: t.muted, border: t.border,
+    primary: brand.primary, onPrimary,
+    card: r.card, button: r.button,
+    heading, body,
+  };
+  const lojistaHref = handle ? `/loja/${handle}/lojista` : null;
 
   const btn = (primary: boolean): React.CSSProperties => ({
     display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
@@ -121,13 +139,32 @@ export function StorefrontView({ brand, store, fallbackName, products, preview, 
               {store.about && <a href="#sobre" style={{ color: t.text, textDecoration: "none" }}>Sobre</a>}
               <a href="#contato" style={{ color: t.text, textDecoration: "none" }}>Contato</a>
             </nav>
-            <span aria-label="Sacola" style={{
-              width: 40, height: 40, borderRadius: r.button,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              border: `1px solid ${t.border}`,
-            }}>
-              <ShoppingBag size={17} />
-            </span>
+            {reseller && reseller.status === "ativo" ? (
+              <span style={{
+                display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12.5, fontWeight: 600,
+                padding: "7px 12px", borderRadius: r.button,
+                background: brand.primary, color: onPrimary,
+              }}>
+                Atacado {reseller.discountPct}%
+                <Link href={`/loja/${handle}/lojista/sair`} aria-label="Sair da conta de lojista"
+                  style={{ color: onPrimary, display: "flex", opacity: .85 }}>
+                  <LogOut size={13} />
+                </Link>
+              </span>
+            ) : reseller ? (
+              <span style={{
+                fontSize: 12.5, fontWeight: 600, padding: "7px 12px", borderRadius: r.button,
+                border: `1px solid ${t.border}`, color: t.muted,
+              }}>Cadastro em análise</span>
+            ) : lojistaHref && !preview ? (
+              <Link href={lojistaHref} style={{
+                display: "inline-flex", alignItems: "center", gap: 7, fontSize: 13, fontWeight: 600,
+                padding: "8px 13px", borderRadius: r.button, textDecoration: "none",
+                border: `1px solid ${t.border}`, color: t.text,
+              }}>
+                <Store size={14} /> Sou lojista
+              </Link>
+            ) : null}
           </div>
         </div>
       </header>
@@ -172,91 +209,8 @@ export function StorefrontView({ brand, store, fallbackName, products, preview, 
             </span>
           </div>
 
-          <div className="sf-grid">
-            {visible.map(p => {
-              const out = p.stock === 0;
-              const sizes = p.sizes.filter(z => z.label);
-              const parc = installment(p.priceCents);
-              const link = wa(`Olá! Tenho interesse em ${p.name}.`);
-              return (
-                <article key={p.id} style={{
-                  background: t.surface, border: `1px solid ${t.border}`,
-                  borderRadius: r.card, overflow: "hidden",
-                  display: "flex", flexDirection: "column",
-                }}>
-                  <div style={{
-                    position: "relative", aspectRatio: "4 / 5",
-                    background: p.imageUrl
-                      ? t.surface
-                      : `linear-gradient(160deg, ${p.hue}2e 0%, ${p.hue}0d 100%)`,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    overflow: "hidden",
-                  }}>
-                    {p.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={p.imageUrl} alt={p.name} loading="lazy"
-                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                    ) : (
-                      <Shirt size={44} strokeWidth={1.2} color={`${p.hue}99`} />
-                    )}
-                    {out && (
-                      <span style={{
-                        position: "absolute", top: 10, left: 10,
-                        fontSize: 11, fontWeight: 600, padding: "4px 9px",
-                        borderRadius: r.button, background: t.surface, color: t.muted,
-                        border: `1px solid ${t.border}`,
-                      }}>Esgotado</span>
-                    )}
-                  </div>
-                  <div style={{ padding: "14px 14px 16px", display: "flex", flexDirection: "column", gap: 4, flex: 1 }}>
-                    {p.category && <span style={{ fontSize: 11.5, color: t.muted }}>{p.category}</span>}
-                    <h3 style={{ fontSize: 14.5, fontWeight: 600, margin: 0, lineHeight: 1.3 }}>{p.name}</h3>
-
-                    {sizes.length > 0 && (
-                      <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 6 }}>
-                        {sizes.map(sz => (
-                          <span key={sz.label} style={{
-                            fontSize: 10.5, fontWeight: 600, lineHeight: 1,
-                            padding: "4px 7px", borderRadius: r.button === 999 ? 999 : 5,
-                            border: `1px solid ${sz.stock > 0 ? t.border : "transparent"}`,
-                            color: sz.stock > 0 ? t.text : t.muted,
-                            opacity: sz.stock > 0 ? 1 : 0.45,
-                            textDecoration: sz.stock > 0 ? "none" : "line-through",
-                          }}>{sz.label}</span>
-                        ))}
-                      </div>
-                    )}
-
-                    <span style={{ fontSize: 15, fontWeight: 700, marginTop: 8, fontVariantNumeric: "tabular-nums" }}>
-                      {fmtCents(p.priceCents)}
-                    </span>
-                    {parc && (
-                      <span style={{ fontSize: 11.5, color: t.muted, fontVariantNumeric: "tabular-nums" }}>
-                        ou {parc.n}x de {fmtCents(parc.cents)}
-                      </span>
-                    )}
-
-                    <div style={{ marginTop: "auto", paddingTop: 12 }}>
-                      {out ? (
-                        <span className="sf-card-btn" style={{ ...btn(false), width: "100%", boxSizing: "border-box", color: t.muted, cursor: "default" }}>
-                          Esgotado
-                        </span>
-                      ) : link ? (
-                        <a href={link} target="_blank" rel="noreferrer" className="sf-card-btn"
-                          style={{ ...btn(true), width: "100%", boxSizing: "border-box" }}>
-                          Quero esta
-                        </a>
-                      ) : (
-                        <span className="sf-card-btn" style={{ ...btn(false), width: "100%", boxSizing: "border-box", color: t.muted, cursor: "default" }}>
-                          Compra online em breve
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+          <ShopGrid products={products} ui={ui} storeName={name}
+            whatsapp={store.whatsapp || null} reseller={reseller ?? null} preview={preview} />
         </div>
       </section>
 

@@ -41,5 +41,5 @@ export async function POST(req: NextRequest) {
   const result = await uploadImage(`${tenantId}/${randomUUID()}.${ext}`, bytes, file.type);
 
   if (!result.ok) return badRequest(result.error);
-  return NextResponse.json({ url: result.url }, { status: 201 });
+  return NextResponse.json({ url: result.url, path: result.path }, { status: 201 });
 }

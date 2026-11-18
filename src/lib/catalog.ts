@@ -172,7 +172,7 @@ export const DEMO_SHOP_ITEMS: ShopItem[] = DEMO_STORE_PRODUCTS.map(p => ({
   category: p.category,
   priceCents: Math.round(p.price * 100),
   hue: p.hue,
-  imageUrl: null,
+  imageUrl: null, photos: [], description: "",
   active: p.active,
   sizes: [],
   stock: p.stock,

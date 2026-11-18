@@ -318,6 +318,7 @@ model Tenant {
 
   users     User[]
   products  Product[]
+  resellers Reseller[]
   customers Customer[]
   orders    Order[]
   movements StockMovement[]
@@ -409,6 +410,7 @@ model Product {
 
   tenant   Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   variants ProductVariant[]
+  images   ProductImage[]
 
   @@index([tenantId])
   @@map("products")
@@ -504,4 +506,44 @@ model StockMovement {
 
   @@index([tenantId, createdAt])
   @@map("stock_movements")
+}
+
+/// Fotos da peça. A primeira (position 0) é a capa e espelha Product.imageUrl.
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  url       String
+  /// Caminho no bucket, para conseguir apagar o arquivo junto
+  path      String   @default("")
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+/// Lojista de atacado: entra na loja pública e vê preço com o desconto dele.
+model Reseller {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  email       String
+  phone       String   @default("")
+  company     String   @default("")
+  document    String   @default("")
+  city        String   @default("")
+  password    String
+  /// pendente | ativo | inativo
+  status      String   @default("pendente")
+  discountPct Int      @default(0)
+  notes       String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("resellers")
 }
