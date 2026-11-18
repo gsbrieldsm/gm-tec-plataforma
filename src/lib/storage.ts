@@ -9,7 +9,13 @@
 const BUCKET = "produtos";
 
 function config() {
-  const url = process.env.SUPABASE_URL?.replace(/\/+$/, "");
+  // O painel mostra a URL do REST em destaque; colar ela inteira é o erro
+  // natural, então aceito as duas formas e guardo só a raiz do projeto.
+  const url = process.env.SUPABASE_URL
+    ?.trim()
+    .replace(/\/+$/, "")
+    .replace(/\/rest\/v1$/, "")
+    .replace(/\/storage\/v1$/, "");
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return null;
   return { url, key };
